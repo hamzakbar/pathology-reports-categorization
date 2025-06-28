@@ -34,7 +34,11 @@ export default function Home() {
     setError(null)
 
     try {
-      const pdfjsLib = await new Promise<any>((res, rej) => {
+      interface PDFJSBrowser {
+        GlobalWorkerOptions: { workerSrc: string }
+        getDocument: (options: any) => { promise: any }
+      }
+      const pdfjsLib: PDFJSBrowser = await new Promise((res, rej) => {
         if ((window as any).pdfjsLib) return res((window as any).pdfjsLib)
         const s = document.createElement('script')
         s.src = '/pdf.min.js'
