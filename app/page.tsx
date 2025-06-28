@@ -14,15 +14,11 @@ interface ConvertedImage {
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [report, setReport] = useState<string>('')
-  const [images, setImages] = useState<ConvertedImage[]>([])
   const [converting, setConverting] = useState(false)
-  const [progress, setProgress] = useState(0)
   const [error, setError] = useState<string | null>(null)
 
   const handleFileSelect = (file: File | null) => {
     setSelectedFile(file)
-    setImages([])
-    setProgress(0)
     setError(null)
     setReport('')
   }
@@ -35,12 +31,9 @@ export default function Home() {
     }
 
     setConverting(true)
-    setImages([])
-    setProgress(0)
     setError(null)
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const pdfjsLib = await new Promise<any>((res, rej) => {
         if ((window as any).pdfjsLib) return res((window as any).pdfjsLib)
         const s = document.createElement('script')
@@ -59,7 +52,6 @@ export default function Home() {
       const tmp: ConvertedImage[] = []
 
       for (let n = 1; n <= total; n++) {
-        setProgress(Math.round(((n - 1) / total) * 100))
         const page = await pdf.getPage(n)
         const v = page.getViewport({ scale: 2 })
         const canvas = document.createElement('canvas')
@@ -77,11 +69,8 @@ export default function Home() {
           url: URL.createObjectURL(blob),
           page: n,
         })
-        setImages([...tmp])
         page.cleanup()
       }
-
-      setProgress(100)
 
       const formData = new FormData()
       for (const img of tmp) {
@@ -107,13 +96,16 @@ export default function Home() {
     } finally {
       setConverting(false)
     }
-  }  
+  }
 
   return (
     <div className='min-h-screen bg-background font-sans'>
       <Header />
       <main className='flex flex-col items-center p-8 pb-20 gap-16 sm:p-20'>
-        <div className='w-full max-w-6xl grid grid-cols-12 gap-8 items-start' style={{ height: '70vh' }}>
+        <div
+          className='w-full max-w-6xl grid grid-cols-12 gap-8 items-start'
+          style={{ height: '70vh' }}
+        >
           <div className='col-span-12 md:col-span-2 flex flex-col items-center space-y-6'>
             <FileUpload
               onFileSelect={handleFileSelect}
