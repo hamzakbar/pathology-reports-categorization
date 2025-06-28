@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const visionPromises: Promise<{ file: string, output: string }>[] = [];
 
-    for (const [_, value] of formData.entries()) {
+    for (const [, value] of formData.entries()) {
         if (value instanceof File) {
             visionPromises.push(
                 (async () => {

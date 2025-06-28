@@ -40,7 +40,8 @@ export default function Home() {
     setError(null)
 
     try {
-      const pdfjsLib: any = await new Promise((res, rej) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const pdfjsLib = await new Promise<any>((res, rej) => {
         if ((window as any).pdfjsLib) return res((window as any).pdfjsLib)
         const s = document.createElement('script')
         s.src = '/pdf.min.js'
