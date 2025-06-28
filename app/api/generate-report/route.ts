@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
         \`\`\`
         
         Based on the biopsy image descriptions and the reference data, analyze what pathological condition(s) the patient most likely has, including any tumor class or urothelial grading. 
-        
+        - The classification should be at the top of the report, and don't mention the json files in your report.        
         - Cross-reference the image findings with the JSON reference data. 
         - Justify your diagnosis with reference codes if possible.
         - Write a clear and concise markdown report for the patient, summarizing your analysis, conclusion, and relevant supporting evidence.

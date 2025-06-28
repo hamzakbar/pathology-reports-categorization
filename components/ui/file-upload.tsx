@@ -1,13 +1,15 @@
 import { ChangeEvent, DragEvent, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { FileText, Loader2 } from "lucide-react";
 
 interface FileUploadProps {
   onFileSelect: (file: File | null) => void;
   onGenerateReport: () => void;
   selectedFile?: File | null;
+  converting?: boolean;
 }
 
-export function FileUpload({ onFileSelect, onGenerateReport, selectedFile }: FileUploadProps) {
+export function FileUpload({ onFileSelect, onGenerateReport, selectedFile, converting }: FileUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleButtonClick = () => {
@@ -59,10 +61,13 @@ export function FileUpload({ onFileSelect, onGenerateReport, selectedFile }: Fil
       </div>
       {selectedFile && (
         <span className="mt-2 text-sm text-primary font-medium truncate max-w-full text-center" title={selectedFile.name}>
-          Selected: {selectedFile.name}
+            <FileText className="w-4 h-4 text-muted-foreground inline" /> {selectedFile.name}
         </span>
       )}
       <Button className="mt-4 w-full" onClick={onGenerateReport} disabled={!selectedFile}>
+        {converting && (
+          <Loader2 className="w-4 h-4 animate-spin text-white" />
+        )}
         Generate Report
       </Button>
     </div>

@@ -95,45 +95,38 @@ export default function Home() {
         method: 'POST',
         body: formData,
       })
+
+      if (!res.ok) throw new Error('Failed to generate report')
+
+      const data = await res.json()
+      setReport(data.markdownReport ?? '')
     } catch (e) {
       console.error(e)
       setError(e instanceof Error ? e.message : 'Conversion or report failed')
     } finally {
       setConverting(false)
     }
-  }
+  }  
 
   return (
     <div className='min-h-screen bg-background font-sans'>
       <Header />
       <main className='flex flex-col items-center p-8 pb-20 gap-16 sm:p-20'>
-        <div className='w-full max-w-6xl grid grid-cols-12 gap-8 items-start'>
+        <div className='w-full max-w-6xl grid grid-cols-12 gap-8 items-start' style={{ height: '70vh' }}>
           <div className='col-span-12 md:col-span-2 flex flex-col items-center space-y-6'>
             <FileUpload
               onFileSelect={handleFileSelect}
               onGenerateReport={handleGenerateReport}
               selectedFile={selectedFile}
+              converting={converting}
             />
 
             {error && (
               <p className='text-xs text-red-600 text-center'>{error}</p>
             )}
-
-            {images.length > 0 && (
-              <div className='w-full space-y-4 overflow-y-auto'>
-                {images.map((img) => (
-                  <img
-                    key={img.page}
-                    src={img.url}
-                    alt={`Page ${img.page}`}
-                    className='w-full max-h-40 object-contain border rounded'
-                  />
-                ))}
-              </div>
-            )}
           </div>
 
-          <div className='col-span-12 md:col-span-10'>
+          <div className='col-span-12 md:col-span-10 h-full overflow-auto'>
             <ReportViewer report={report} />
           </div>
         </div>
