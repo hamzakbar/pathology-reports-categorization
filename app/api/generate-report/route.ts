@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
                     const base64Image = buffer.toString("base64");
                     const mimeType = value.type || "image/png";
                     const response = await openai.chat.completions.create({
-                        model: "gpt-4o",
+                        model: "gpt-4.1",
                         messages: [
                             {
                                 role: "user",
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
 `;
 
     const reportResponse = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-4.1",
         messages: [
             {
                 role: "system",
