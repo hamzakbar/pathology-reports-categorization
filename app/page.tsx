@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Header from '@/components/ui/header'
 import { FileUpload } from '@/components/ui/file-upload'
 import { ReportViewer } from '@/components/ui/report-viewer'
-import { Button } from '@/components/ui/button'
 
 interface ConvertedImage {
   name: string
@@ -25,6 +24,7 @@ export default function Home() {
     setImages([])
     setProgress(0)
     setError(null)
+    setReport('')
   }
 
   const handleGenerateReport = async () => {
@@ -53,6 +53,7 @@ export default function Home() {
       const pdf = await pdfjsLib.getDocument({
         data: new Uint8Array(await selectedFile.arrayBuffer()),
       }).promise
+
       const total = pdf.numPages
       const tmp: ConvertedImage[] = []
 
@@ -80,8 +81,23 @@ export default function Home() {
       }
 
       setProgress(100)
+
+      const formData = new FormData()
+      for (const img of tmp) {
+        const blob = await fetch(img.url).then((r) => r.blob())
+        formData.append(
+          'images',
+          new File([blob], img.name, { type: 'image/png' })
+        )
+      }
+
+      const res = await fetch('/api/generate-report', {
+        method: 'POST',
+        body: formData,
+      })
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Conversion failed')
+      console.error(e)
+      setError(e instanceof Error ? e.message : 'Conversion or report failed')
     } finally {
       setConverting(false)
     }
