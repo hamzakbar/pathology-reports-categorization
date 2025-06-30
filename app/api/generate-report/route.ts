@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
-import fs from "fs/promises";
-import path from "path";
 
 const openai = new OpenAI();
 
@@ -233,6 +231,9 @@ export async function POST(req: NextRequest) {
         When analyzing the image findings and preparing your report, follow these rules:
         
         - Begin your report with a **clear diagnosis and risk category** for the patient, based strictly on the image descriptions and reference data.
+        - **If tumor size and number are *not mentioned* in the image transcription, do not assign a definitive risk category (Low/Intermediate/High/Muscle Invasive). Instead, list the plausible risk categories that are possible based on the available information, and discuss recommendations for each category. Clearly state that exact risk cannot be determined due to missing data on tumor size/number.**
+        - **When making recommendations, provide guideline-based advice for each plausible risk category.**
+        - **Incase where the risk category is not definitive, the Risk Category heading in the report should be called as Risk Category Possibilities.
         - **Justify your conclusions** with reference codes where possible.
         - Use the **exact guideline wording** when making recommendations.
           - If guidelines recommend a certain action (e.g., repeat biopsy for pT1), state this clearly (e.g., "Guideline Statement 14 recommends repeat transurethral resection of the primary tumor site within six weeks for T1 disease.").
