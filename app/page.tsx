@@ -14,6 +14,7 @@ interface ConvertedImage {
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [report, setReport] = useState<string>('')
+  const [results, setResults] = useState([])
   const [converting, setConverting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -94,6 +95,7 @@ export default function Home() {
 
       const data = await res.json()
       setReport(data.markdownReport ?? '')
+      setResults(data.results ?? [])
     } catch (e) {
       console.error(e)
       setError(e instanceof Error ? e.message : 'Conversion or report failed')
@@ -105,10 +107,10 @@ export default function Home() {
   return (
     <div className='min-h-screen bg-background font-sans'>
       <Header />
-      <main className='flex flex-col items-center p-8 pb-20 gap-16 sm:p-20'>
+      <main className='flex flex-col items-center p-8 pb-20 gap-16 sm:p-10'>
         <div
           className='w-full max-w-6xl grid grid-cols-12 gap-8 items-start'
-          style={{ height: '70vh' }}
+          style={{ height: '80vh' }}
         >
           <div className='col-span-12 md:col-span-2 flex flex-col items-center space-y-6'>
             <FileUpload
@@ -124,7 +126,7 @@ export default function Home() {
           </div>
 
           <div className='col-span-12 md:col-span-10 h-full overflow-auto'>
-            <ReportViewer report={report} />
+            <ReportViewer report={report} imagesTextMarkdown={results} />
           </div>
         </div>
       </main>
