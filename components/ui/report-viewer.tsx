@@ -17,9 +17,11 @@ function MarkdownContent({ markdown }: { markdown: string }) {
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
-        h1: (props) => <h1 className='text-2xl font-bold mb-4' {...props} />,
-        h2: (props) => <h2 className='text-xl font-bold mb-3' {...props} />,
-        h3: (props) => <h3 className='text-lg font-bold mb-2' {...props} />,
+        h1: (props) => (
+          <h1 className='text-2xl font-semibold mb-4' {...props} />
+        ),
+        h2: (props) => <h2 className='text-xl font-semibold mb-3' {...props} />,
+        h3: (props) => <h3 className='text-lg font-semibold mb-2' {...props} />,
         p: (props) => <p className='mb-4' {...props} />,
         ul: (props) => <ul className='list-disc pl-6 mb-4' {...props} />,
         ol: (props) => <ol className='list-decimal pl-6 mb-4' {...props} />,
