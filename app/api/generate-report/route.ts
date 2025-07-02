@@ -257,6 +257,40 @@ export async function POST(req: NextRequest) {
         - Do not generate findings not present in the data.
         - Format your answer as a markdown report.
 
+        **Always follow this exact report layout and these rules:**
+
+        ### Report Structure
+
+        1. **Diagnosis**
+           - State the diagnosis in plain language.
+           - **ALWAYS include the explicit pathological stage, in bold markdown, inside parentheses after the diagnosis** (e.g., (**Ta**), (**T1**), etc.) in the diagnosis line.
+           - Example: “Papillary urothelial carcinoma, low grade (**Ta**).”
+
+        2. **Pathology Details**
+           - Concisely summarize all relevant findings (e.g., “No evidence of invasion.”, “No muscularis propria present for evaluation.”).
+
+        3. **Risk Category or Risk Category Possibilities**
+           - If risk is definitive, use: **Risk Category: [category]** (e.g., “Risk Category: Low Risk”).
+           - If risk is NOT definitive (e.g., size/number missing), use: **Risk Category Possibilities** as the heading.
+           - Explain why risk cannot be determined.
+           - List all plausible categories and their rationale.
+           - Explicitly exclude ineligible categories.
+
+        4. **Recommendations**
+           - For each plausible risk category, list all relevant AUA recommendations, using the **exact guideline wording and statement number**.
+           - Do not infer or include recommendations not directly justified by findings and risk.
+
+        5. **Important Notes**
+           - Highlight any caveats (e.g., “Muscularis propria was not present for evaluation.” or “No evidence of high-grade disease, CIS, LVI, variant histology, or muscle invasion is reported.”).
+
+        6. **Conclusion**
+           - Summarize the clinical picture, stating why risk is definitive or indeterminate.
+
+        7. **Legend**
+           - Spell out all acronyms used (NMIBC, LVI, CIS, TURBT, BCG, HG, LG, etc).
+
+        8. **References**
+           - List the referenced AUA guideline statement numbers.
     `;
 
     const reportResponse = await openai.chat.completions.create({
