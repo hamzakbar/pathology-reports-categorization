@@ -1,50 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import fetch from "node-fetch";
+import FormData from "form-data";
 
 const openai = new OpenAI();
 
 export async function POST(req: NextRequest) {
     const formData = await req.formData();
-    const visionPromises: Promise<{ file: string, output: string }>[] = [];
+    const file = formData.get("file");
 
-    for (const [, value] of formData.entries()) {
-        if (value instanceof File) {
-            visionPromises.push(
-                (async () => {
-                    const arrayBuffer = await value.arrayBuffer();
-                    const buffer = Buffer.from(arrayBuffer);
-                    const base64Image = buffer.toString("base64");
-                    const mimeType = value.type || "image/png";
-                    const response = await openai.chat.completions.create({
-                        model: "gpt-4.1",
-                        messages: [
-                            {
-                                role: "user",
-                                content: [
-                                    { type: "text", text: "convert this image into text, i want each and every word in the output, just give me transcription, no extra text" },
-                                    {
-                                        type: "image_url",
-                                        image_url: {
-                                            url: `data:${mimeType};base64,${base64Image}`,
-                                            detail: "auto",
-                                        },
-                                    },
-                                ],
-                            },
-                        ],
-                    });
-                    const outputText = response.choices?.[0]?.message?.content ?? "";
-                    return { file: value.name, output: outputText };
-                })()
-            );
-        }
+    if (!(file instanceof File)) {
+        return NextResponse.json({ error: "No file uploaded." }, { status: 400 });
     }
 
-    const visionResults = await Promise.all(visionPromises);
+    let ocrText = '';
+    try {
+        const pdfBuffer = Buffer.from(await file.arrayBuffer());
+        const ocrForm = new FormData();
 
-    const visionTextCombined = visionResults.map(
-        (res, idx) => `Image ${idx + 1} (${res.file}):\n${res.output}`
-    ).join("\n\n");
+        ocrForm.append('file', pdfBuffer, {
+            filename: file.name,
+            contentType: file.type || "application/pdf",
+        });
+
+        const ocrRes = await fetch(`${process.env.API_BASE_URL}/ocr/text`, {
+            method: 'POST',
+            body: ocrForm as any,
+            headers: ocrForm.getHeaders(),
+        });
+
+        if (!ocrRes.ok) throw new Error(`OCR API failed (${ocrRes.status})`);
+        const ocrJson: any = await ocrRes.json();
+
+        if (!ocrJson.success) throw new Error('OCR API did not return success');
+
+        ocrText = ocrJson.content || '';
+    } catch (err: any) {
+        return NextResponse.json({ error: err.message ?? 'OCR extraction failed.' }, { status: 500 });
+    }
 
     const prompt = `
         Based on this AUA risk stratification table, please classify the images that I've added before:
@@ -303,7 +296,7 @@ export async function POST(req: NextRequest) {
             {
                 role: "user",
                 content: [
-                    { type: "text", text: visionTextCombined + "\n\n" + prompt }
+                    { type: "text", text: ocrText + "\n\n" + prompt }
                 ],
             },
         ],
@@ -315,6 +308,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
         markdownReport,
-        results: visionResults
+        results: [
+            {
+                file: file.name,
+                output: ocrText
+            }
+        ]
     });
 }

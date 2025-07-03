@@ -5,16 +5,10 @@ import Header from '@/components/ui/header'
 import { FileUpload } from '@/components/ui/file-upload'
 import { ReportViewer } from '@/components/ui/report-viewer'
 
-interface ConvertedImage {
-  name: string
-  url: string
-  page: number
-}
-
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [report, setReport] = useState<string>('')
-  const [results, setResults] = useState([])
+  const [results, setResults] = useState<any[]>([])
   const [converting, setConverting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -22,6 +16,7 @@ export default function Home() {
     setSelectedFile(file)
     setError(null)
     setReport('')
+    setResults([])
   }
 
   const handleGenerateReport = async () => {
@@ -35,56 +30,8 @@ export default function Home() {
     setError(null)
 
     try {
-      interface PDFJSBrowser {
-        GlobalWorkerOptions: { workerSrc: string }
-        getDocument: (options: any) => { promise: any }
-      }
-      const pdfjsLib: PDFJSBrowser = await new Promise((res, rej) => {
-        if ((window as any).pdfjsLib) return res((window as any).pdfjsLib)
-        const s = document.createElement('script')
-        s.src = '/pdf.min.js'
-        s.onload = () => res((window as any).pdfjsLib)
-        s.onerror = () => rej(new Error('Failed to load pdf.js'))
-        document.head.appendChild(s)
-      })
-      pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js'
-
-      const pdf = await pdfjsLib.getDocument({
-        data: new Uint8Array(await selectedFile.arrayBuffer()),
-      }).promise
-
-      const total = pdf.numPages
-      const tmp: ConvertedImage[] = []
-
-      for (let n = 1; n <= total; n++) {
-        const page = await pdf.getPage(n)
-        const v = page.getViewport({ scale: 2 })
-        const canvas = document.createElement('canvas')
-        canvas.width = v.width
-        canvas.height = v.height
-        await page.render({
-          canvasContext: canvas.getContext('2d')!,
-          viewport: v,
-        }).promise
-        const blob = await new Promise<Blob>((r) =>
-          canvas.toBlob((b) => r(b!), 'image/png', 0.95)
-        )
-        tmp.push({
-          name: `${selectedFile.name.replace(/\.pdf$/i, '')}_page_${n}.png`,
-          url: URL.createObjectURL(blob),
-          page: n,
-        })
-        page.cleanup()
-      }
-
       const formData = new FormData()
-      for (const img of tmp) {
-        const blob = await fetch(img.url).then((r) => r.blob())
-        formData.append(
-          'images',
-          new File([blob], img.name, { type: 'image/png' })
-        )
-      }
+      formData.append('file', selectedFile)
 
       const res = await fetch('/api/generate-report', {
         method: 'POST',
@@ -98,7 +45,7 @@ export default function Home() {
       setResults(data.results ?? [])
     } catch (e) {
       console.error(e)
-      setError(e instanceof Error ? e.message : 'Conversion or report failed')
+      setError(e instanceof Error ? e.message : 'Report generation failed')
     } finally {
       setConverting(false)
     }

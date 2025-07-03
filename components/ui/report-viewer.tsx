@@ -79,9 +79,8 @@ export function ReportViewer({
           )
         ) : imagesTextMarkdown && imagesTextMarkdown.length > 0 ? (
           <div>
-            {imagesTextMarkdown.map((img, idx) => (
+            {imagesTextMarkdown.map((img) => (
               <div key={img.file} className='mb-8'>
-                <div className='font-semibold mb-2'>{`Page ${idx + 1}`}</div>
                 <MarkdownContent markdown={img.output} />
               </div>
             ))}
