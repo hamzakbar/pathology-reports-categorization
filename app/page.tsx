@@ -2,32 +2,55 @@
 
 import { useState } from 'react'
 import Header from '@/components/ui/header'
-import { FileUpload } from '@/components/ui/file-upload'
 import { ReportViewer } from '@/components/ui/report-viewer'
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@/components/ui/resizable'
+import { ChatPanel, Message } from '@/components/chat-panel'
+
+export type ViewMode = 'report' | 'extracted'
 
 export default function Home() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [report, setReport] = useState<string>('')
   const [results, setResults] = useState<any[]>([])
+  const [messages, setMessages] = useState<Message[]>([])
   const [converting, setConverting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<ViewMode>('report')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+
+  const isReportGenerated = report.length > 0
 
   const handleFileSelect = (file: File | null) => {
-    setSelectedFile(file)
-    setError(null)
-    setReport('')
-    setResults([])
-  }
-
-  const handleGenerateReport = async () => {
-    if (!selectedFile) return
-    if (selectedFile.type !== 'application/pdf') {
-      setError('Please choose a PDF')
+    if (file && file.type !== 'application/pdf') {
+      alert('Please select a PDF file.')
       return
     }
+    setSelectedFile(file)
+  }
+
+  const handleInitialGenerateReport = async () => {
+    if (!selectedFile) return
 
     setConverting(true)
-    setError(null)
+    setReport('')
+    setResults([])
+
+    setMessages([
+      {
+        id: Date.now().toString(),
+        role: 'user',
+        content: `Analyzed: ${selectedFile.name}`,
+        attachment: { name: selectedFile.name, type: selectedFile.type },
+      },
+      {
+        id: (Date.now() + 1).toString(),
+        role: 'system',
+        content: 'Generating the report...',
+        type: 'loading',
+      },
+    ])
 
     try {
       const formData = new FormData()
@@ -38,44 +61,103 @@ export default function Home() {
         body: formData,
       })
 
-      if (!res.ok) throw new Error('Failed to generate report')
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null)
+        throw new Error(
+          errorData?.error || 'Failed to generate report from server.'
+        )
+      }
 
-      const data = await res.json()
-      setReport(data.markdownReport ?? '')
-      setResults(data.results ?? [])
+      const responseData = await res.json()
+
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.type === 'loading'
+            ? {
+                ...msg,
+                content: 'Report generated successfully!',
+                type: 'system',
+              }
+            : msg
+        )
+      )
+
+      setReport(responseData.markdownReport ?? '')
+      setResults(responseData.results ?? [])
     } catch (e) {
+      const errorMessage =
+        e instanceof Error ? e.message : 'An unknown error occurred.'
       console.error(e)
-      setError(e instanceof Error ? e.message : 'Report generation failed')
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.type === 'loading'
+            ? { ...msg, content: `Error: ${errorMessage}`, type: 'error' }
+            : msg
+        )
+      )
     } finally {
       setConverting(false)
     }
   }
 
+  const handleFollowUpSubmit = (data: { text: string; file: File | null }) => {
+    console.log('Follow-up question:', data.text)
+    const newUserMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: data.text,
+    }
+    const placeholderResponse: Message = {
+      id: (Date.now() + 1).toString(),
+      role: 'system',
+      content: 'Follow-up question functionality is not yet implemented.',
+    }
+
+    setMessages((prev) => [...prev, newUserMessage, placeholderResponse])
+  }
+
+  const handleStartNewReport = () => {
+    setReport('')
+    setResults([])
+    setMessages([])
+    setSelectedFile(null)
+    setConverting(false)
+  }
+
   return (
-    <div className='min-h-screen bg-background font-sans'>
-      <Header />
-      <main className='flex flex-col items-center p-8 pb-20 gap-16 sm:p-10'>
-        <div
-          className='w-full max-w-6xl grid grid-cols-12 gap-8 items-start'
-          style={{ height: '80vh' }}
-        >
-          <div className='col-span-12 md:col-span-2 flex flex-col items-center space-y-6'>
-            <FileUpload
-              onFileSelect={handleFileSelect}
-              onGenerateReport={handleGenerateReport}
+    <div className='flex flex-col h-screen bg-background font-sans'>
+      <Header
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        onStartNewReport={handleStartNewReport}
+        isReportGenerated={isReportGenerated}
+      />
+
+      <main className='flex-grow min-h-0'>
+        <ResizablePanelGroup direction='horizontal' className='h-full'>
+          <ResizablePanel defaultSize={30} minSize={0} className='p-4'>
+            <ChatPanel
+              messages={messages}
+              isGenerating={converting}
+              onInitialGenerateReport={handleInitialGenerateReport}
+              onFollowUpSubmit={handleFollowUpSubmit}
+              isReportGenerated={isReportGenerated}
               selectedFile={selectedFile}
-              converting={converting}
+              onFileSelect={handleFileSelect}
             />
+          </ResizablePanel>
 
-            {error && (
-              <p className='text-xs text-red-600 text-center'>{error}</p>
-            )}
-          </div>
+          <ResizableHandle withHandle />
 
-          <div className='col-span-12 md:col-span-10 h-full overflow-auto'>
-            <ReportViewer report={report} imagesTextMarkdown={results} />
-          </div>
-        </div>
+          <ResizablePanel defaultSize={70} minSize={50} className='p-4'>
+            <ReportViewer
+              isGenerating={converting}
+              view={viewMode}
+              report={report}
+              imagesTextMarkdown={results}
+            />
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </main>
     </div>
   )
