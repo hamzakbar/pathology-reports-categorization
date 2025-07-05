@@ -51,7 +51,7 @@ function SkeletonLoader() {
   )
 }
 
-export function MarkdownContent({ markdown }: { markdown: string }) {
+export function MarkdownContent({ markdown, report }: { markdown: string, report?: boolean }) {
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
@@ -68,7 +68,7 @@ export function MarkdownContent({ markdown }: { markdown: string }) {
         h3: (props) => (
           <h3 className='text-xl font-semibold mb-3 mt-4' {...props} />
         ),
-        p: (props) => <p className='leading-relaxed' {...props} />,
+        p: (props) => <p className={`leading-relaxed ${report && 'mb-4'}`} {...props} />,
         ul: (props) => (
           <ul className='list-disc pl-6 mb-4 space-y-2' {...props} />
         ),
@@ -115,7 +115,6 @@ function EmptyState() {
   )
 }
 
-// The main export component with the final rendering logic
 export function ReportViewer({
   isGenerating,
   view,
@@ -146,7 +145,7 @@ export function ReportViewer({
               <div>
                 {imagesTextMarkdown.map((img, index) => (
                   <div key={img.file + index} className='mb-8'>
-                    <MarkdownContent markdown={img.output} />
+                    <MarkdownContent markdown={img.output} report={true} />
                   </div>
                 ))}
               </div>
