@@ -16,7 +16,7 @@ export type ViewMode = 'report' | 'extracted'
 
 export default function Home() {
   const [report, setReport] = useState<string>('')
-  const [results, setResults] = useState<any[]>([])
+  const [results, setResults] = useState<{ file: string; output: string }[]>([])
   const [messages, setMessages] = useState<Message[]>([])
   const [converting, setConverting] = useState(false)
   const [viewMode, setViewMode] = useState<ViewMode>('report')
@@ -24,7 +24,8 @@ export default function Home() {
   const [isExporting, setIsExporting] = useState(false)
 
   const isReportGenerated = report.length > 0
-  
+
+  // Handler for the FileUploadZone
   const handleFileSelect = (file: File | null) => {
     if (file && file.type !== 'application/pdf') {
       alert('Please select a PDF file.')
@@ -32,7 +33,8 @@ export default function Home() {
     }
     setSelectedFile(file)
   }
-  
+
+  // Handler for the initial "Generate Report" button
   const handleInitialGenerateReport = async () => {
     if (!selectedFile) return
     setConverting(true)
@@ -96,23 +98,68 @@ export default function Home() {
     }
   }
 
-  
-  const handleFollowUpSubmit = (data: { text: string; file: File | null }) => {
-    console.log('Follow-up question:', data.text)
+  // Handler for follow-up questions, now sends both contexts to the API
+  const handleFollowUpSubmit = async (data: {
+    text: string
+    file: File | null
+  }) => {
+    const userPrompt = data.text
+
     const newUserMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: data.text,
+      content: userPrompt,
     }
-    const placeholderResponse: Message = {
+    const loadingMessage: Message = {
       id: (Date.now() + 1).toString(),
       role: 'system',
-      content: 'Follow-up question functionality is not yet implemented.',
+      content: 'Thinking...',
+      type: 'loading',
     }
-    setMessages((prev) => [...prev, newUserMessage, placeholderResponse])
+    setMessages((prev) => [...prev, newUserMessage, loadingMessage])
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: userPrompt,
+          reportContext: report,
+          redactedTextContext: results.map((r) => r.output).join('\n\n'),
+        }),
+      })
+
+      if (!res.ok) {
+        throw new Error('Failed to get a response from the server.')
+      }
+
+      const responseData = await res.json()
+
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.type === 'loading'
+            ? { id: msg.id, role: 'system', content: responseData.response }
+            : msg
+        )
+      )
+    } catch (error) {
+      console.error('Follow-up error:', error)
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.type === 'loading'
+            ? {
+                id: msg.id,
+                role: 'system',
+                content: 'Sorry, I encountered an error. Please try again.',
+                type: 'error',
+              }
+            : msg
+        )
+      )
+    }
   }
 
-  
+  // Handler to reset the application state
   const handleStartNewReport = () => {
     setReport('')
     setResults([])
@@ -121,7 +168,7 @@ export default function Home() {
     setConverting(false)
   }
 
-  
+  // The final export function with the fontkit fix
   const handleExport = async () => {
     if (!selectedFile || !report) {
       alert('No report available to export.')
@@ -130,9 +177,8 @@ export default function Home() {
 
     setIsExporting(true)
     try {
-      
-      const fontUrl = '/fonts/NotoSans-Regular.ttf'
-      const boldFontUrl = '/fonts/NotoSans-Bold.ttf'
+      const fontUrl = '/fonts/Geist-Regular.otf'
+      const boldFontUrl = '/fonts/Geist-Bold.otf'
 
       const [fontBytes, boldFontBytes] = await Promise.all([
         fetch(fontUrl).then((res) => res.arrayBuffer()),
@@ -142,10 +188,8 @@ export default function Home() {
       const originalPdfBytes = await selectedFile.arrayBuffer()
       const pdfDoc = await PDFDocument.load(originalPdfBytes)
 
-      
       pdfDoc.registerFontkit(fontkit)
 
-      
       const geistFont = await pdfDoc.embedFont(fontBytes)
       const geistBoldFont = await pdfDoc.embedFont(boldFontBytes)
 
@@ -153,7 +197,7 @@ export default function Home() {
       const pageSize =
         originalPages.length > 0
           ? originalPages[0].getSize()
-          : { width: 595, height: 842 } 
+          : { width: 595, height: 842 }
 
       let page = pdfDoc.addPage([pageSize.width, pageSize.height])
       const { width, height } = page.getSize()
@@ -258,7 +302,7 @@ export default function Home() {
       />
       <main className='flex-grow min-h-0'>
         <ResizablePanelGroup direction='horizontal' className='h-full'>
-          <ResizablePanel defaultSize={30} minSize={0} className='p-4'>
+          <ResizablePanel defaultSize={35} minSize={30} className='p-4 pt-0'>
             <ChatPanel
               messages={messages}
               isGenerating={converting}
@@ -270,8 +314,7 @@ export default function Home() {
             />
           </ResizablePanel>
           <ResizableHandle withHandle />
-
-          <ResizablePanel defaultSize={70} minSize={50} className='p-4'>
+          <ResizablePanel defaultSize={65} minSize={40} className='p-4 pt-0'>
             <ReportViewer
               isGenerating={converting}
               view={viewMode}

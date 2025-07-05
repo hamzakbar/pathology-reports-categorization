@@ -27,7 +27,7 @@ export default function Header({
   }
 
   return (
-    <header className='flex h-16 items-center justify-between bg-background px-4 md:px-6 shrink-0 border-b'>
+    <header className='flex h-16 items-center justify-between bg-background px-4 md:px-6 shrink-0'>
       <div className='flex items-center gap-4'>
         <div className='flex items-center gap-3 font-semibold text-lg'>
           <Microscope className='h-6 w-6' />
@@ -36,7 +36,7 @@ export default function Header({
 
         {isReportGenerated && (
           <Button variant='outline' size='sm' onClick={onStartNewReport}>
-            <FilePlus2 className='mr-2 h-4 w-4' />
+            <FilePlus2 className='h-4 w-4' />
             New Report
           </Button>
         )}

@@ -51,7 +51,7 @@ function SkeletonLoader() {
   )
 }
 
-function MarkdownContent({ markdown }: { markdown: string }) {
+export function MarkdownContent({ markdown }: { markdown: string }) {
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
@@ -68,7 +68,7 @@ function MarkdownContent({ markdown }: { markdown: string }) {
         h3: (props) => (
           <h3 className='text-xl font-semibold mb-3 mt-4' {...props} />
         ),
-        p: (props) => <p className='mb-4 leading-relaxed' {...props} />,
+        p: (props) => <p className='leading-relaxed' {...props} />,
         ul: (props) => (
           <ul className='list-disc pl-6 mb-4 space-y-2' {...props} />
         ),

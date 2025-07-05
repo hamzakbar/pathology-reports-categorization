@@ -43,7 +43,7 @@ function ResizableHandle({
         className
       )}
       {...props}
-      style={{ marginRight: '-17px', marginTop: '20px', marginBottom: '20px' }}
+      style={{ marginRight: '-19px', marginTop: '40px', marginBottom: '40px' }}
     >
       {withHandle && (
         <div className='bg-border z-10 flex h-4 w-3 items-center justify-center rounded-xs border'>

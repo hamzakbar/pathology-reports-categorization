@@ -80,7 +80,7 @@ export function FileUploadZone({
               className='text-lg text-primary font-medium truncate max-w-xs'
               title={selectedFile.name}
             >
-              <FileText className='w-5 h-5 text-muted-foreground inline mr-2' />
+              <FileText className='w-5 h-5 text-muted-foreground inline' />
               {selectedFile.name}
             </span>
           </div>

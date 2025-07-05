@@ -1,9 +1,18 @@
+import { useEffect, useRef } from 'react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ChatInput } from '@/components/chat-input'
 import { FileUploadZone } from '@/components/file-upload-zone'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { FileText, Loader2, User, AlertCircle, Image as ImageIcon, Microscope } from 'lucide-react';
+import {
+  FileText,
+  Loader2,
+  User,
+  AlertCircle,
+  Image as ImageIcon,
+  Microscope,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { MarkdownContent } from './ui/report-viewer'
 
 export interface Message {
   id: string
@@ -35,11 +44,27 @@ export function ChatPanel({
   selectedFile,
   onFileSelect,
 }: ChatPanelProps) {
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      const viewport = scrollAreaRef.current.querySelector(
+        '[data-radix-scroll-area-viewport]'
+      )
+      if (viewport) {
+        viewport.scrollTo({
+          top: viewport.scrollHeight,
+          behavior: 'smooth',
+        })
+      }
+    }
+  }, [messages])
+
   return (
     <div className='flex flex-col h-full bg-background rounded-xl border'>
       {isReportGenerated ? (
         <>
-          <ScrollArea className='flex-grow min-h-0'>
+          <ScrollArea className='flex-grow min-h-0' ref={scrollAreaRef}>
             <div className='flex flex-col gap-4 p-4'>
               {messages.map((message) => (
                 <div
@@ -78,16 +103,16 @@ export function ChatPanel({
                         </span>
                       </div>
                     )}
-                    <div className='flex items-center gap-2'>
+                    <div className='flex items-start gap-2'>
                       {message.type === 'loading' && (
-                        <Loader2 className='h-4 w-4 animate-spin' />
+                        <Loader2 className='h-4 w-4 animate-spin mt-1' />
                       )}
                       {message.type === 'error' && (
-                        <AlertCircle className='h-4 w-4' />
+                        <AlertCircle className='h-4 w-4 mt-1' />
                       )}
-                      <p className='text-sm leading-relaxed break-words'>
-                        {message.content}
-                      </p>
+                      <div>
+                        <MarkdownContent markdown={message.content} />
+                      </div>
                     </div>
                   </div>
 
