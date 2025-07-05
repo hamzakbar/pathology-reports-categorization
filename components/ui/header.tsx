@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { Microscope, FilePlus2 } from 'lucide-react'
+import { Microscope, FilePlus2, Download, Loader2 } from 'lucide-react'
 import { ThemeToggle } from './theme-toggle'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
@@ -10,6 +10,8 @@ interface HeaderProps {
   setViewMode: (mode: ViewMode) => void
   onStartNewReport: () => void
   isReportGenerated: boolean
+  onExport: () => void
+  isExporting: boolean
 }
 
 export default function Header({
@@ -17,6 +19,8 @@ export default function Header({
   setViewMode,
   onStartNewReport,
   isReportGenerated,
+  onExport,
+  isExporting,
 }: HeaderProps) {
   const handleToggle = (checked: boolean) => {
     setViewMode(checked ? 'extracted' : 'report')
@@ -32,8 +36,8 @@ export default function Header({
 
         {isReportGenerated && (
           <Button variant='outline' size='sm' onClick={onStartNewReport}>
-            <FilePlus2 className='h-4 w-4' />
-            <span className='mt-1'>New Report</span>
+            <FilePlus2 className='mr-2 h-4 w-4' />
+            New Report
           </Button>
         )}
       </div>
@@ -73,7 +77,19 @@ export default function Header({
         {isReportGenerated && <div className='h-6 w-px bg-border' />}
 
         <ThemeToggle />
-        <Button size='sm'>Export</Button>
+
+        <Button
+          size='sm'
+          onClick={onExport}
+          disabled={!isReportGenerated || isExporting}
+        >
+          {isExporting ? (
+            <Loader2 className='h-4 w-4 animate-spin' />
+          ) : (
+            <Download className='h-4 w-4' />
+          )}
+          Export
+        </Button>
       </div>
     </header>
   )
