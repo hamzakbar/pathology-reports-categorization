@@ -12,6 +12,7 @@ import { ChatPanel, Message } from '@/components/chat-panel'
 import { useExportPdf } from '../lib/use-export-pdf'
 
 export type ViewMode = 'report' | 'extracted'
+export type Criteria = 'nccn' | 'aua'
 
 export default function Home() {
   const [report, setReport] = useState<string>('')
@@ -20,6 +21,7 @@ export default function Home() {
   const [converting, setConverting] = useState(false)
   const [viewMode, setViewMode] = useState<ViewMode>('report')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [criteria, setCriteria] = useState<Criteria>('nccn')
   const { exportPdf, isExporting } = useExportPdf()
 
   const isReportGenerated = report.length > 0
@@ -55,7 +57,7 @@ export default function Home() {
     try {
       const formData = new FormData()
       formData.append('file', selectedFile)
-      const res = await fetch('/api/generate-report', {
+      const res = await fetch(`/api/generate-report?criteria=${criteria}`, {
         method: 'POST',
         body: formData,
       })
@@ -82,7 +84,6 @@ export default function Home() {
     } catch (e) {
       const errorMessage =
         e instanceof Error ? e.message : 'An unknown error occurred.'
-      console.error(e)
       setMessages((prev) =>
         prev.map((msg) =>
           msg.type === 'loading'
@@ -100,7 +101,6 @@ export default function Home() {
     file: File | null
   }) => {
     const userPrompt = data.text
-
     const newUserMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
@@ -125,12 +125,9 @@ export default function Home() {
         }),
       })
 
-      if (!res.ok) {
-        throw new Error('Failed to get a response from the server.')
-      }
+      if (!res.ok) throw new Error('Failed to get a response from the server.')
 
       const responseData = await res.json()
-
       setMessages((prev) =>
         prev.map((msg) =>
           msg.type === 'loading'
@@ -138,8 +135,7 @@ export default function Home() {
             : msg
         )
       )
-    } catch (error) {
-      console.error('Follow-up error:', error)
+    } catch {
       setMessages((prev) =>
         prev.map((msg) =>
           msg.type === 'loading'
@@ -188,6 +184,8 @@ export default function Home() {
               isReportGenerated={isReportGenerated}
               selectedFile={selectedFile}
               onFileSelect={handleFileSelect}
+              criteria={criteria}
+              setCriteria={setCriteria}
             />
           </ResizablePanel>
           <ResizableHandle withHandle />
