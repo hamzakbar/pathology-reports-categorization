@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { MarkdownContent } from './ui/report-viewer'
+import type { Criteria } from '@/app/page'
 
 export interface Message {
   id: string
@@ -33,6 +34,8 @@ interface ChatPanelProps {
   onFollowUpSubmit: (data: { text: string; file: File | null }) => void
   selectedFile: File | null
   onFileSelect: (file: File | null) => void
+  criteria: Criteria
+  setCriteria: (c: Criteria) => void
 }
 
 export function ChatPanel({
@@ -43,20 +46,17 @@ export function ChatPanel({
   onFollowUpSubmit,
   selectedFile,
   onFileSelect,
+  criteria,
+  setCriteria,
 }: ChatPanelProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      const viewport = scrollAreaRef.current.querySelector(
-        '[data-radix-scroll-area-viewport]'
-      )
-      if (viewport) {
-        viewport.scrollTo({
-          top: viewport.scrollHeight,
-          behavior: 'smooth',
-        })
-      }
+    const viewport = scrollAreaRef.current?.querySelector(
+      '[data-radix-scroll-area-viewport]'
+    ) as HTMLElement | null
+    if (viewport) {
+      viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' })
     }
   }, [messages])
 
@@ -110,12 +110,9 @@ export function ChatPanel({
                       {message.type === 'error' && (
                         <AlertCircle className='h-4 w-4 mt-1' />
                       )}
-                      <div>
-                        <MarkdownContent markdown={message.content} />
-                      </div>
+                      <MarkdownContent markdown={message.content} />
                     </div>
                   </div>
-
                   {message.role === 'user' && (
                     <Avatar className='h-8 w-8'>
                       <AvatarFallback>
@@ -141,6 +138,8 @@ export function ChatPanel({
           onFileSelect={onFileSelect}
           onGenerateReport={onInitialGenerateReport}
           isGenerating={isGenerating}
+          criteria={criteria}
+          setCriteria={setCriteria}
         />
       )}
     </div>
