@@ -25,11 +25,13 @@ function assemblePrompt(
     return `
     Based on the **${criteria.toUpperCase()}** risk-stratification information below, please classify the images that I've added before.
 
+    ${criteria === 'nccn' && 'give recommendations from all the text that i have given you from ncnn'}
+
     ${riskBlock}
 
     ---
 
-    ${guidelinesText}
+    ${criteria === 'aua' && guidelinesText}
 
     ---
 
@@ -81,8 +83,6 @@ export async function POST(req: NextRequest) {
         cfg.guideline_statements,
         cfg.report_instructions
     )
-
-    console.log('prompt: ', prompt)
 
     let markdownReport = ""
     try {
