@@ -9,7 +9,7 @@ import {
   ResizablePanelGroup,
 } from '@/components/ui/resizable'
 import { ChatPanel, Message } from '@/components/chat-panel'
-import { useExportPdf } from '../lib/use-export-pdf'
+import { usePdfExport } from '@/lib/use-export-pdf'
 
 export type ViewMode = 'report' | 'extracted'
 export type Criteria = 'nccn' | 'aua'
@@ -22,7 +22,8 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<ViewMode>('report')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [criteria, setCriteria] = useState<Criteria>('nccn')
-  const { exportPdf, isExporting } = useExportPdf()
+
+  const { exportPdf, isExporting } = usePdfExport()
 
   const isReportGenerated = report.length > 0
 
@@ -57,6 +58,7 @@ export default function Home() {
     try {
       const formData = new FormData()
       formData.append('file', selectedFile)
+
       const res = await fetch(`/api/generate-report?criteria=${criteria}`, {
         method: 'POST',
         body: formData,
