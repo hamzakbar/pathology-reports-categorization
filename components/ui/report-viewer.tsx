@@ -68,7 +68,9 @@ export function MarkdownContent({ markdown, report }: { markdown: string, report
         h3: (props) => (
           <h3 className='text-xl font-semibold mb-3 mt-4' {...props} />
         ),
-        p: (props) => <p className={`leading-relaxed ${report && 'mb-4'}`} {...props} />,
+        p: (props) => (
+          <p className={`leading-relaxed ${report && 'mb-4'}`} {...props} />
+        ),
         ul: (props) => (
           <ul className='list-disc pl-6 mb-4 space-y-2' {...props} />
         ),
@@ -89,6 +91,7 @@ export function MarkdownContent({ markdown, report }: { markdown: string, report
         blockquote: (props) => (
           <blockquote className='mt-6 border-l-2 pl-6 italic' {...props} />
         ),
+        br: (props) => <br {...props} />,
         code: (props) => (
           <code
             className='relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold'

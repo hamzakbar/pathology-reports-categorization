@@ -1,0 +1,1506 @@
+[
+    {
+        "name": "NMIBC_Risk_Stratification",
+        "version": "NCCN_1.2025",
+        "category": "Non-Muscle-Invasive Bladder Cancer (NMIBC)",
+        "algorithm": {
+            "start": "initial",
+            "nodes": [
+                {
+                    "id": "initial",
+                    "type": "info",
+                    "description": "Initial TURBT shows NMIBC",
+                    "next": "resection_complete"
+                },
+                {
+                    "id": "resection_complete",
+                    "type": "decision",
+                    "question": "Was the initial resection visually complete?",
+                    "options": {
+                        "yes": "grade_check",
+                        "no_or_high_volume": "repeat_candidate"
+                    }
+                },
+                {
+                    "id": "grade_check",
+                    "type": "decision",
+                    "question": "Histologic grade after complete resection",
+                    "options": {
+                        "low_grade_nmibc": "final_management",
+                        "high_grade_nmibc": "cis_or_ta1"
+                    }
+                },
+                {
+                    "id": "cis_or_ta1",
+                    "type": "decision",
+                    "question": "Is there carcinoma in situ (CIS) or Ta¹ present?",
+                    "options": {
+                        "yes": "final_management",
+                        "no": "final_management"
+                    }
+                },
+                {
+                    "id": "repeat_candidate",
+                    "type": "action",
+                    "description": "Visual incompleteness or high-volume tumour → ‘T1 or consider for select Ta¹’ ⇒ Repeat TURBT",
+                    "next": "post_repeat"
+                },
+                {
+                    "id": "post_repeat",
+                    "type": "decision",
+                    "question": "Pathology after repeat TURBT",
+                    "options": {
+                        "residual_nmibc_or_no_cancer": "final_management",
+                        "mibc": "refer_bl1"
+                    }
+                },
+                {
+                    "id": "final_management",
+                    "type": "endpoint",
+                    "description": "Proceed to Management per NMIBC Risk Group (BL-3)",
+                    "link": "BL-3:start"
+                },
+                {
+                    "id": "refer_bl1",
+                    "type": "endpoint",
+                    "description": "Stage II (cT2 N0) Muscle-Invasive Bladder Cancer pathway",
+                    "link": "BL-5:stage_ii_entry"
+                }
+            ]
+        },
+        "risk_groups": {
+            "low_risk": {
+                "label": "Low Risk",
+                "criteria": [
+                    "Papillary urothelial neoplasm of low malignant potential",
+                    "Low-grade urothelial carcinoma AND stage Ta AND size ≤ 3 cm AND solitary lesion"
+                ]
+            },
+            "intermediate_risk": {
+                "label": "Intermediate Risk",
+                "criteria": [
+                    "Low-grade urothelial carcinoma AND (stage T1 OR size > 3 cm OR multifocal OR recurrence < 1 year)",
+                    "High-grade urothelial carcinoma AND stage Ta AND size ≤ 3 cm AND solitary lesion"
+                ]
+            },
+            "high_risk": {
+                "label": "High Risk",
+                "criteria": [
+                    "High-grade urothelial carcinoma AND (CIS OR stage T1 OR size > 3 cm OR multifocal)",
+                    "Any very-high-risk feature: BCG-unresponsive, certain histopathologic subtypes, lymphovascular invasion, prostatic urethral invasion"
+                ]
+            }
+        },
+        "footnotes": {
+            "high_volume_tumour": "High-volume tumours (large or highly multifocal) are at high risk of residual tumour.",
+            "repeat_turbt_guidance": "Consider repeat TURBT for high-grade Ta, particularly if large and/or no muscle in specimen.",
+            "muscle_presence": "Muscle should be present in repeat TURBT pathology specimen whenever possible."
+        }
+    },
+    {
+        "name": "NMIBC_Management_Per_Risk_Group",
+        "version": "NCCN_1.2025",
+        "category": "Non-Muscle-Invasive Bladder Cancer (NMIBC)",
+        "inputs": [
+            "aua_risk_group",
+            "bcg_status"
+        ],
+        "management": {
+            "low": {
+                "initial": [
+                    {
+                        "therapy": "Surveillance",
+                        "footnotes": [
+                            "°"
+                        ]
+                    }
+                ],
+                "follow_up": {
+                    "if_cytology_positive_and_imaging_negative": {
+                        "cystoscopy_negative": {
+                            "action": "Follow BL-4 algorithm"
+                        },
+                        "cystoscopy_positive": {
+                            "action": "Reclassify AUA Risk Group and manage accordingly"
+                        }
+                    }
+                }
+            },
+            "intermediate": {
+                "initial": [
+                    {
+                        "therapy": "Intravesical therapy",
+                        "preferred": true,
+                        "footnotes": [
+                            "p",
+                            "q",
+                            "r"
+                        ]
+                    },
+                    {
+                        "therapy": "Surveillance"
+                    }
+                ],
+                "follow_up": {
+                    "reference": "BL-E",
+                    "note": "If prior BCG, maintenance BCG preferred",
+                    "evaluation": {
+                        "if_cytology_positive_and_imaging_negative": {
+                            "cystoscopy_negative": {
+                                "action": "Follow BL-4 algorithm"
+                            },
+                            "cystoscopy_positive": {
+                                "action": "Reclassify AUA Risk Group and manage accordingly"
+                            }
+                        }
+                    }
+                }
+            },
+            "high": {
+                "bcg_status": {
+                    "naive": {
+                        "very_high_risk_features": {
+                            "yes": [
+                                {
+                                    "therapy": "Repeat, complete TURBT (re-resection within 4–6 weeks)",
+                                    "preferred": true
+                                },
+                                {
+                                    "therapy": "Cystectomy",
+                                    "preferred": true
+                                },
+                                {
+                                    "therapy": "BCG"
+                                }
+                            ],
+                            "no": [
+                                {
+                                    "therapy": "Repeat, complete TURBT (re-resection within 4–6 weeks)",
+                                    "preferred": true
+                                },
+                                {
+                                    "therapy": "BCG",
+                                    "preferred": true,
+                                    "category": 1
+                                },
+                                {
+                                    "therapy": "Cystectomy"
+                                }
+                            ]
+                        }
+                    },
+                    "unresponsive_or_intolerant": {
+                        "initial": [
+                            {
+                                "therapy": "Repeat, complete TURBT (re-resection within 4–6 weeks)",
+                                "preferred": true
+                            },
+                            {
+                                "therapy": "Cystectomy",
+                                "preferred": true
+                            },
+                            {
+                                "therapy": "Intravesical chemotherapy",
+                                "footnotes": [
+                                    "p"
+                                ]
+                            },
+                            {
+                                "therapy": "Pembrolizumab OR Nadofaragene firadenovec-vncg OR Nogapendekin alfa inbakicept-pmln + BCG (select patients)",
+                                "select_patients": true,
+                                "footnotes": [
+                                    "s",
+                                    "t",
+                                    "u"
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "follow_up": {
+                    "reference": "BL-E",
+                    "note": "If prior BCG, maintenance BCG preferred",
+                    "evaluation": {
+                        "if_cytology_positive_and_imaging_negative": {
+                            "cystoscopy_negative": {
+                                "action": "Follow BL-4 algorithm"
+                            },
+                            "cystoscopy_positive": {
+                                "action": "Reclassify AUA Risk Group and manage accordingly"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "footnotes": {
+            "°": "Should consider single peri-operative instillation of intravesical chemotherapy at time of TURBT.",
+            "p": "Principles of Instillation Therapy (BL-E).",
+            "q": "Options for intravesical therapy for intermediate-risk disease include BCG and chemotherapy; consider BCG availability.",
+            "r": "If not a cystectomy candidate and recurrence is high-grade cTa or cT1, consider concurrent chemoradiotherapy (category 2B for cTa, category 2A for cT1) or a clinical trial (see BL-G).",
+            "s": "Pembrolizumab may be considered for BCG-unresponsive, high-risk NMIBC as detailed in BL-3 footnote 5.",
+            "t": "Nadofaragene firadenovec-vncg may be considered for BCG-unresponsive, high-risk NMIBC with CIS (± papillary).",
+            "u": "Nogapendekin alfa inbakicept-pmln + BCG may be considered for BCG-unresponsive, high-risk NMIBC with CIS (± papillary).",
+            "very_high_risk_features": "Lymphovascular invasion, prostatic urethral involvement, or aggressive histologic subtype (e.g., micropapillary, plasmacytoid, sarcomatoid)."
+        }
+    },
+    {
+        "name": "Positive_Urine_Cytology_Workup",
+        "id": "BL-3",
+        "version": "NCCN_1.2025",
+        "category": "Management of Positive Urine Cytology (Imaging– / Cystoscopy–)",
+        "description": "Work-up and management for patients with positive urine cytology but negative imaging and cystoscopy",
+        "inputs": [
+            "cytology_positive"
+        ],
+        "outputs": [
+            "bladder_path",
+            "prostate_path",
+            "upper_tract_path",
+            "neg_follow_up"
+        ],
+        "footnotes": {
+            "*": "Enhanced cystoscopy if available; otherwise proceed with bladder biopsies ± ureteroscopy.",
+            "c": "Principles of Surgical Management (BL-B).",
+            "p": "Principles of Instillation Therapy (BL-E).",
+            "w": "Follow-up schedule is on BL-E."
+        }
+    },
+    {
+        "name": "Positive_Urine_Cytology_Workup",
+        "id": "BL-4",
+        "version": "NCCN_1.2025",
+        "category": "Management of Positive Urine Cytology (Imaging– / Cystoscopy–)",
+        "description": "Evaluation and treatment paths when urine cytology is positive but imaging and cystoscopy are negative",
+        "algorithm": {
+            "start": "cytology_positive_entry",
+            "nodes": [
+                {
+                    "id": "cytology_positive_entry",
+                    "type": "info",
+                    "description": "Recurrent / persistent disease follow-up: cytology (+), imaging (–), cystoscopy (–)",
+                    "next": "evaluation_block"
+                },
+                {
+                    "id": "evaluation_block",
+                    "type": "action",
+                    "description": "Consider repeat cytology ≤ 3 mo, mapping biopsies (incl. prostate*), upper-tract cytology, ureteroscopy, enhanced cystoscopy*, non-urinary tract search (vagina, cervix, rectum), refer as needed",
+                    "next": "categorize_findings"
+                },
+                {
+                    "id": "categorize_findings",
+                    "type": "decision",
+                    "question": "Site of positive findings after work-up",
+                    "options": {
+                        "all_negative": "neg_follow_up",
+                        "bladder_positive": "bladder_path",
+                        "prostate_positive": "prostate_path",
+                        "upper_tract_positive": "upper_tract_path"
+                    }
+                },
+                {
+                    "id": "neg_follow_up",
+                    "type": "endpoint",
+                    "description": "Bladder / prostate / upper tract negative → follow-up at 3 mo then extend interval; if prior BCG, maintenance BCG optional",
+                    "link": "BL-E-1:start"
+                },
+                {
+                    "id": "bladder_path",
+                    "type": "endpoint",
+                    "description": "Bladder source identified → reclassify AUA risk group and manage accordingly",
+                    "link": "BL-3:start"
+                },
+                {
+                    "id": "prostate_path",
+                    "type": "endpoint",
+                    "description": "Prostate source → follow Urothelial Carcinoma of the Prostate pathway",
+                    "link": "UCP-1:start"
+                },
+                {
+                    "id": "upper_tract_path",
+                    "type": "endpoint",
+                    "description": "Upper-tract source → follow Upper GU Tract Tumors pathway",
+                    "link": "UTT-1:start"
+                }
+            ]
+        },
+        "footnotes": {
+            "c": "Principles of Surgical Management (BL-B).",
+            "p": "Principles of Instillation Therapy (BL-E).",
+            "w": "Follow-up schedule is on BL-E.",
+            "d": "Enhanced cystoscopy if available; otherwise proceed with bladder biopsies ± ureteroscopy."
+        },
+        "links": [
+            {
+                "from": "BL-3.management.follow_up.evaluation.if_cytology_positive_and_imaging_negative.cystoscopy_negative.action",
+                "to": "BL-4:start"
+            },
+            {
+                "from": "BL-11.bl4_jump",
+                "to": "BL-4:start"
+            },
+            {
+                "from": "BL-4.neg_follow_up",
+                "to": "BL-E-1:start"
+            },
+            {
+                "from": "BL-4.bladder_path",
+                "to": "BL-3:start"
+            },
+            {
+                "from": "BL-4.prostate_path",
+                "to": "UCP-1:start"
+            },
+            {
+                "from": "BL-4.upper_tract_path",
+                "to": "UTT-1:start"
+            }
+        ]
+    },
+    {
+        "name": "NMIBC_Follow_Up",
+        "id": "BL-E-1",
+        "version": "NCCN_1.2025",
+        "category": "Bladder Cancer – Non-Muscle-Invasive Follow-Up",
+        "description": "Surveillance schedule after initial management of NMIBC",
+        "algorithm": {
+            "start": "select_aua_risk_group",
+            "nodes": [
+                {
+                    "id": "select_aua_risk_group",
+                    "type": "decision",
+                    "question": "Current AUA risk group (per BL-2 reassessment)",
+                    "options": {
+                        "low": "low_follow_up",
+                        "intermediate": {
+                            "link": "BL-E-2:start"
+                        },
+                        "high": {
+                            "link": "BL-E-2:start"
+                        }
+                    }
+                },
+                {
+                    "id": "low_follow_up",
+                    "type": "endpoint",
+                    "description": "Low-risk NMIBC follow-up schedule",
+                    "schedule": {
+                        "cystoscopy": {
+                            "year_1": [
+                                "3_months",
+                                "12_months"
+                            ],
+                            "year_2_to_4": "annually",
+                            "year_5_plus": "as_clinically_indicated"
+                        },
+                        "upper_tract_and_abdomen_pelvis_imaging": {
+                            "baseline": true,
+                            "follow_up": "as_clinically_indicated"
+                        },
+                        "blood_tests": "N/A",
+                        "urine_tests": "N/A"
+                    }
+                }
+            ]
+        },
+        "risk_group_definitions_ref": "BL-2:risk_groups",
+        "footnotes": {
+            "*": "Within each risk strata an individual patient may have more or fewer concerning features that can influence care.",
+            "a": "Kamat AM, et al. J Clin Oncol 2016;34:1935-1944.",
+            "b": "See aggressive subtype histologies listed on Bladder Cancer: Non-Urothelial and Urothelial with Subtype Histology (BL-D).",
+            "c": "See AUA Risk Stratification for Non-Muscle-Invasive Bladder Cancer definitions on BL-2."
+        },
+        "links": [
+            {
+                "from": "BL-2.final_management",
+                "to": "BL-E-1:start"
+            }
+        ]
+    },
+    {
+        "name": "NMIBC_Follow_Up",
+        "id": "BL-E-2",
+        "version": "NCCN_1.2025",
+        "category": "Bladder Cancer – Non-Muscle-Invasive Follow-Up (Intermediate & High Risk)",
+        "description": "Surveillance schedules for intermediate- and high-risk NMIBC after initial management",
+        "algorithm": {
+            "start": "select_intermediate_or_high",
+            "nodes": [
+                {
+                    "id": "select_intermediate_or_high",
+                    "type": "decision",
+                    "question": "Current AUA risk group",
+                    "options": {
+                        "intermediate": "intermediate_follow_up",
+                        "high": "high_follow_up"
+                    }
+                },
+                {
+                    "id": "intermediate_follow_up",
+                    "type": "endpoint",
+                    "description": "Intermediate-risk NMIBC follow-up schedule",
+                    "schedule": {
+                        "cystoscopy": {
+                            "year_1": [
+                                "3_months",
+                                "6_months",
+                                "12_months"
+                            ],
+                            "year_2": "every_6_months",
+                            "year_3_to_4": "annually",
+                            "year_5_plus": "as_clinically_indicated"
+                        },
+                        "upper_tract_and_abdomen_pelvis_imaging": {
+                            "year_1": "baseline_imaging",
+                            "follow_up": "as_clinically_indicated"
+                        },
+                        "blood_tests": "N/A",
+                        "urine_tests": {
+                            "year_1": [
+                                "urine_cytology_3_months",
+                                "urine_cytology_6_months",
+                                "urine_cytology_12_months"
+                            ],
+                            "year_2": "urine_cytology_every_6_months",
+                            "year_3_to_4": "annually",
+                            "year_5_plus": "as_clinically_indicated"
+                        }
+                    }
+                },
+                {
+                    "id": "high_follow_up",
+                    "type": "endpoint",
+                    "description": "High-risk NMIBC follow-up schedule",
+                    "schedule": {
+                        "cystoscopy": {
+                            "year_1": "every_3_months",
+                            "year_2_to_4": "every_6_months",
+                            "year_5": "annually",
+                            "year_5_plus": "as_clinically_indicated"
+                        },
+                        "upper_tract_imaging": {
+                            "year_1": [
+                                "baseline_imaging",
+                                "12_months"
+                            ],
+                            "year_2_to_4": "every_1-2_years",
+                            "follow_up": "as_clinically_indicated"
+                        },
+                        "abdomen_pelvis_imaging": {
+                            "year_1": "baseline_imaging",
+                            "follow_up": "as_clinically_indicated"
+                        },
+                        "blood_tests": "N/A",
+                        "urine_tests": {
+                            "year_1": [
+                                "urine_cytology_every_3_months",
+                                "consider_urinary_urothelial_tumor_markers_category_2B"
+                            ],
+                            "year_2_to_4": "urine_cytology_every_6_months",
+                            "year_5": "annually",
+                            "year_5_plus": "as_clinically_indicated"
+                        }
+                    }
+                }
+            ]
+        },
+        "risk_group_definitions_ref": "BL-2:risk_groups",
+        "footnotes": {
+            "c": "See AUA Risk Stratification for Non-Muscle-Invasive Bladder Cancer definitions on BL-2.",
+            "d": "See Principles of Imaging for Bladder/Urothelial Cancer (BL-A)."
+        }
+    },
+    {
+        "name": "NMIBC_Follow_Up",
+        "id": "BL-E-3",
+        "version": "NCCN_1.2025",
+        "category": "Bladder Cancer – Post-Cystectomy NMIBC Follow-Up",
+        "description": "Surveillance schedule after cystectomy performed for non-muscle-invasive bladder cancer",
+        "algorithm": {
+            "start": "post_cystectomy_follow_up",
+            "nodes": [
+                {
+                    "id": "post_cystectomy_follow_up",
+                    "type": "endpoint",
+                    "description": "Post-cystectomy NMIBC follow-up schedule",
+                    "schedule": {
+                        "cystoscopy": "N/A",
+                        "imaging": {
+                            "year_1": "CTU or MRU (upper tracts + axial abdomen/pelvis) at 3 & 12 mo",
+                            "year_2_to_4": "CTU or MRU (upper tracts + axial abdomen/pelvis) annually",
+                            "year_5": "Renal ultrasound annually",
+                            "year_5_plus": "As clinically indicated"
+                        },
+                        "blood_tests": {
+                            "year_1": [
+                                "Renal-function tests (electrolytes, creatinine) every 3-6 mo",
+                                "LFT every 3-6 mo",
+                                "CBC & CMP every 3-6 mo if chemotherapy was received"
+                            ],
+                            "year_2": [
+                                "Renal-function tests annually",
+                                "LFT annually",
+                                "B₂ annually (clinical judgement)"
+                            ],
+                            "year_3_plus": "B₂ annually (clinical judgement)"
+                        },
+                        "urine_tests": {
+                            "year_1": [
+                                "Consider urine cytology every 6-12 mo",
+                                "Consider urethral-wash cytology every 6-12 mo ⁹"
+                            ],
+                            "year_2_plus": [
+                                "Urine cytology as clinically indicated",
+                                "Urethral-wash cytology as clinically indicated"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        "footnotes": {
+            "d": "See Principles of Imaging for Bladder/Urothelial Cancer (BL-A).",
+            "e": "Renal ultrasound is to look for hydronephrosis.",
+            "f": "Liver-function testing (LFT) includes AST, ALT, bilirubin, alkaline phosphatase.",
+            "g": "Urethral-wash cytology is reserved for patients with high-risk disease: multifocal CIS, prostatic urethral invasion."
+        },
+        "links": [
+            {
+                "from": "BL-E-3.post_cystectomy_follow_up",
+                "to": "BL-E-4:start"
+            },
+            {
+                "from": "BL-E-3.post_cystectomy_follow_up",
+                "to": "BL-E-5:start"
+            },
+            {
+                "from": "BL-E-3.post_cystectomy_follow_up",
+                "to": "BL-11:start"
+            }
+        ]
+    },
+    {
+        "name": "MIBC_Post_Cystectomy_Follow_Up",
+        "id": "BL-E-4",
+        "version": "NCCN_1.2025",
+        "category": "Bladder Cancer – Post-Cystectomy MIBC Follow-Up",
+        "description": "Surveillance schedule after cystectomy performed for muscle-invasive bladder cancer",
+        "algorithm": {
+            "start": "post_cystectomy_mibc",
+            "nodes": [
+                {
+                    "id": "post_cystectomy_mibc",
+                    "type": "endpoint",
+                    "description": "Post-cystectomy MIBC follow-up schedule",
+                    "schedule": {
+                        "cystoscopy": "N/A",
+                        "imaging": {
+                            "year_1": [
+                                "CTU or MRU (upper tracts + axial abdomen/pelvis) every 3–6 mo",
+                                "CT chest (preferred) or chest x-ray every 3–6 mo",
+                                "FDG-PET/CT (category 2B) only if metastatic disease suspected"
+                            ],
+                            "year_2_to_3": [
+                                "CTU or MRU (upper tracts + axial abdomen/pelvis) every 3–6 mo",
+                                "CT chest (preferred) or chest x-ray every 3–6 mo",
+                                "FDG-PET/CT (category 2B) only if metastatic disease suspected"
+                            ],
+                            "year_4": [
+                                "Abdomen/pelvis CT or MRI annually",
+                                "CT chest (preferred) or chest x-ray annually",
+                                "FDG-PET/CT (category 2B) only if metastatic disease suspected"
+                            ],
+                            "year_5": "Renal ultrasound annually ᵉ",
+                            "year_5_plus": "As clinically indicated"
+                        },
+                        "blood_tests": {
+                            "year_1": [
+                                "Renal-function tests (electrolytes, creatinine) every 3–6 mo",
+                                "LFTᶠ every 3–6 mo",
+                                "CBC & CMP every 3–6 mo if chemotherapy was received"
+                            ],
+                            "year_2_to_4": [
+                                "Renal-function testing (electrolytes, creatinine) annually",
+                                "LFT annually",
+                                "B₂ annually based on clinical judgement"
+                            ],
+                            "year_5_plus": "B₂ annually based on clinical judgement"
+                        },
+                        "urine_tests": {
+                            "year_1": [
+                                "Consider urine cytology every 6–12 mo",
+                                "Consider urethral-wash cytology every 6–12 mo ᵍ"
+                            ],
+                            "year_2_to_4": "—",
+                            "year_5_plus": [
+                                "Urine cytology as clinically indicated",
+                                "Urethral-wash cytology as clinically indicated"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        "footnotes": {
+            "d": "See Principles of Imaging for Bladder/Urothelial Cancer (BL-A).",
+            "e": "Renal ultrasound is performed to look for hydronephrosis.",
+            "f": "Liver-function testing (LFT) includes AST, ALT, bilirubin, and alkaline phosphatase.",
+            "g": "Urethral-wash cytology is reserved for patients with high-risk disease (positive urethral margin, multifocal CIS, prostatic urethral invasion)."
+        },
+        "links": [
+            {
+                "from": "BL-E-4.post_cystectomy_mibc",
+                "to": "BL-E-5:start"
+            },
+            {
+                "from": "BL-E-4.post_cystectomy_mibc",
+                "to": "BL-11:start"
+            },
+            {
+                "from": "BL-E-4.post_cystectomy_mibc",
+                "to": "BL-E-6:start"
+            },
+            {
+                "from": "BL-E-4.post_cystectomy_mibc",
+                "to": "BL-5:stage_ii_entry"
+            }
+        ]
+    },
+    {
+        "name": "Post_Bladder_Sparing_Follow_Up",
+        "id": "BL-E-5",
+        "version": "NCCN_1.2025",
+        "category": "Bladder Cancer – Post-Bladder Sparing (Partial Cystectomy / Chemoradiation)",
+        "description": "Surveillance schedule for patients who retained their bladder after surgery or chemoradiation",
+        "algorithm": {
+            "start": "post_bladder_sparing",
+            "nodes": [
+                {
+                    "id": "post_bladder_sparing",
+                    "type": "endpoint",
+                    "description": "Follow-up plan after bladder-sparing treatment",
+                    "schedule": {
+                        "cystoscopy": {
+                            "year_1": "every_3_months",
+                            "year_2": "every_3_months",
+                            "year_3_to_4": "every_6_months",
+                            "year_5": "annually",
+                            "year_5_plus": "as_clinically_indicated"
+                        },
+                        "imaging": {
+                            "year_1_to_2": [
+                                "CTU or MRU (upper tracts + axial abdomen/pelvis) every 3–6 mo for MIBC",
+                                "CT chest (preferred) or chest x-ray every 3–6 mo for MIBC",
+                                "FDG-PET/CT (category 2B) only if metastatic disease suspected"
+                            ],
+                            "year_3_to_4": [
+                                "Abdomen/pelvis CT or MRI annually",
+                                "CT chest (preferred) or chest x-ray annually",
+                                "FDG-PET/CT (category 2B) only if metastatic disease suspected"
+                            ],
+                            "year_5_plus": "renal_ultrasound_annually ᵉ and/or imaging as clinically indicated"
+                        },
+                        "blood_tests": {
+                            "year_1": [
+                                "renal_function_tests (electrolytes, creatinine) every 3–6 mo",
+                                "LFTᶠ every 3–6 mo",
+                                "CBC & CMP every 3–6 mo if chemotherapy received"
+                            ],
+                            "year_2": [
+                                "renal_function_tests (electrolytes, creatinine) every 3–6 mo",
+                                "LFTᶠ every 3–6 mo"
+                            ],
+                            "year_3_plus": [
+                                "renal_function_tests (electrolytes, creatinine) as clinically indicated",
+                                "LFTᶠ as clinically indicated"
+                            ]
+                        },
+                        "urine_tests": {
+                            "year_1": "urine_cytology_every_6-12_months",
+                            "year_2_to_4": "—",
+                            "year_5_plus": "urine_cytology_as_clinically_indicated"
+                        }
+                    }
+                }
+            ]
+        },
+        "footnotes": {
+            "d": "See Principles of Imaging for Bladder/Urothelial Cancer (BL-A).",
+            "f": "LFT includes AST, ALT, bilirubin, and alkaline phosphatase.",
+            "h": "For patients not eligible for aggressive therapy, surveillance may be less frequent (e.g., cystoscopy every 6 months, then annually).",
+            "i": "PET/CT is not recommended for NMIBC.",
+            "e": "Renal ultrasound is to look for hydronephrosis."
+        },
+        "links": [
+            {
+                "from": "BL-E-5.post_bladder_sparing",
+                "to": "BL-11:start"
+            },
+            {
+                "from": "BL-E-5.post_bladder_sparing",
+                "to": "BL-E-6:start"
+            }
+        ]
+    },
+    {
+        "name": "Metastatic_Disease_Surveillance",
+        "id": "BL-E-6",
+        "version": "NCCN_1.2025",
+        "category": "Bladder Cancer – Metastatic Disease: Surveillance",
+        "description": "Follow-up schedule for patients with metastatic bladder cancer who are under surveillance",
+        "algorithm": {
+            "start": "metastatic_surveillance",
+            "nodes": [
+                {
+                    "id": "metastatic_surveillance",
+                    "type": "endpoint",
+                    "description": "Surveillance plan once metastatic disease is diagnosed or suspected",
+                    "schedule": {
+                        "cystoscopy": {
+                            "year_1_plus": "as_clinically_indicated"
+                        },
+                        "imaging": {
+                            "year_1_plus": [
+                                "CTU or MRU (upper tracts + axial abdomen/pelvis) every 3–6 mo if clinically indicated and with any clinical change or new symptoms",
+                                "CT chest/abdomen/pelvis every 3–6 mo and with any clinical change or new symptoms",
+                                "FDG-PET/CT (category 2B) only if metastatic disease is suspected"
+                            ]
+                        },
+                        "blood_tests": {
+                            "year_1_plus": [
+                                "CBC and CMP every 1–3 mo",
+                                "Vitamin B₁₂ annually for patients who have undergone a cystectomy (based on clinical judgment)"
+                            ]
+                        },
+                        "urine_tests": {
+                            "year_1_plus": "urine_cytology_as_clinically_indicated"
+                        }
+                    }
+                }
+            ]
+        },
+        "footnotes": {
+            "d": "See Principles of Imaging for Bladder/Urothelial Cancer (BL-A)."
+        },
+        "links": [
+            {
+                "from": "BL-E-3.post_cystectomy_follow_up",
+                "to": "BL-E-6:start"
+            },
+            {
+                "from": "BL-E-4.post_cystectomy_mibc",
+                "to": "BL-E-6:start"
+            },
+            {
+                "from": "BL-E-5.post_bladder_sparing",
+                "to": "BL-E-6:start"
+            }
+        ]
+    },
+    {
+        "name": "MIBC_Stage_II_Management",
+        "id": "BL-5",
+        "version": "NCCN_1.2025",
+        "category": "Muscle-Invasive Bladder Cancer (Stage II – cT2 N0)",
+        "description": "Work-up, primary treatment options, and subsequent management for clinical stage II MIBC",
+        "algorithm": {
+            "start": "stage_ii_entry",
+            "nodes": [
+                {
+                    "id": "stage_ii_entry",
+                    "type": "info",
+                    "description": "Clinical staging: Stage II (cT2, N0)",
+                    "next": "additional_workup"
+                },
+                {
+                    "id": "additional_workup",
+                    "type": "action",
+                    "description": "Perform additional work-up",
+                    "tasks": [
+                        "CT or MRI abdomen/pelvis if not previously done",
+                        "Chest imaging (CT chest)",
+                        "Bone scan or MRI if suspicion/symptoms of bone metastases",
+                        "Estimate glomerular filtration rate (GFR) to assess cisplatin eligibility"
+                    ],
+                    "next": "primary_treatment"
+                },
+                {
+                    "id": "primary_treatment",
+                    "type": "decision",
+                    "question": "Choose primary treatment strategy",
+                    "options": {
+                        "neoadj_chemo_radical_cystectomy": {
+                            "next": "adjuvant_bl6"
+                        },
+                        "neoadj_chemo_partial_cystectomy": {
+                            "next": "adjuvant_bl6"
+                        },
+                        "cystectomy_alone": {
+                            "next": "adjuvant_bl6"
+                        },
+                        "bladder_preservation_chemoRT": {
+                            "next": "reassess_post_treatment"
+                        },
+                        "radiation_only_not_surgical_candidate": {
+                            "next": "reassess_post_treatment"
+                        }
+                    }
+                },
+                {
+                    "id": "adjuvant_bl6",
+                    "type": "endpoint",
+                    "description": "Proceed to Adjuvant Treatment",
+                    "link": "BL-6:start"
+                },
+                {
+                    "id": "reassess_post_treatment",
+                    "type": "decision",
+                    "question": "Reassess tumor status 2–3 mo after treatment completion",
+                    "options": {
+                        "no_tumor": "no_tumor_management",
+                        "tumor_present": "tumor_management"
+                    }
+                },
+                {
+                    "id": "no_tumor_management",
+                    "type": "endpoint",
+                    "description": "Surveillance ± systemic therapy/RT ± TURBT ± intravesical therapy and best supportive care",
+                    "link": "BL-E-1:start"
+                },
+                {
+                    "id": "tumor_management",
+                    "type": "decision",
+                    "question": "Residual disease classification",
+                    "options": {
+                        "CIS_Ta_T1": "turbt_intravesical",
+                        "persistent_T2": "surgical_or_metastatic"
+                    }
+                },
+                {
+                    "id": "turbt_intravesical",
+                    "type": "endpoint",
+                    "description": "TURBT ± intravesical therapy",
+                    "link": "BL-E-1:start"
+                },
+                {
+                    "id": "surgical_or_metastatic",
+                    "type": "decision",
+                    "question": "Is patient a candidate for surgical re-resection?",
+                    "options": {
+                        "yes": {
+                            "description": "Cystectomy or partial cystectomy (highly selected)",
+                            "link": "BL-E-1:start"
+                        },
+                        "no": {
+                            "description": "Treat as metastatic disease",
+                            "link": "BL-10:start"
+                        }
+                    }
+                }
+            ]
+        },
+        "footnotes": {
+            "g": "Neoadjuvant cisplatin-based combination chemotherapy ± peri-operative/sandwich immunotherapy.",
+            "d": "Partial cystectomy only in highly-selected solitary lesions, no CIS.",
+            "p": "Intravesical therapy per Principles of Instillation Therapy (BL-E).",
+            "aa": "Concurrent chemoradiotherapy per Principles of Systemic Therapy.",
+            "bb": "See footnotes on BL-6 for timing details.",
+            "cc": "Maximal TURBT required before bladder-preservation chemoradiotherapy."
+        },
+        "links": [
+            {
+                "from": "BL-2.refer_bl1",
+                "to": "BL-5:stage_ii_entry"
+            },
+            {
+                "from": "BL-E-4.post_cystectomy_mibc",
+                "to": "BL-5:stage_ii_entry"
+            }
+        ]
+    },
+    {
+        "name": "MIBC_Adjuvant_Treatment",
+        "id": "BL-6",
+        "version": "NCCN_1.2025",
+        "category": "Muscle-Invasive Bladder Cancer – Adjuvant Treatment",
+        "description": "Systemic / radiation options after radical or partial cystectomy",
+        "algorithm": {
+            "start": "choose_adjuvant_strategy",
+            "nodes": [
+                {
+                    "id": "choose_adjuvant_strategy",
+                    "type": "decision",
+                    "question": "Which clinical scenario applies after cystectomy?",
+                    "options": {
+                        "preop_GemCis_Durva": "use_durvalumab_postop",
+                        "no_neoadj_cisplatin_high_risk": "discuss_cisplatin_or_io",
+                        "received_neoadj_cisplatin_high_risk": "consider_nivolumab_or_pembro",
+                        "rt_candidate": "consider_adjuvant_rt"
+                    }
+                },
+                {
+                    "id": "use_durvalumab_postop",
+                    "type": "endpoint",
+                    "description": "If gemcitabine + cisplatin + durvalumab was given pre-op → continue durvalumab post-op",
+                    "link": "BL-E-4:start"
+                },
+                {
+                    "id": "discuss_cisplatin_or_io",
+                    "type": "endpoint",
+                    "description": "pT3, pT4a, or pN+ without prior cisplatin: discuss adjuvant cisplatin-based chemo (preferred) **or** nivolumab/pembrolizumab",
+                    "link": "BL-E-4:start"
+                },
+                {
+                    "id": "consider_nivolumab_or_pembro",
+                    "type": "endpoint",
+                    "description": "ypT2–ypT4a or ypN+ after cisplatin neoadjuvant: consider nivolumab **or** pembrolizumab",
+                    "link": "BL-E-4:start"
+                },
+                {
+                    "id": "consider_adjuvant_rt",
+                    "type": "endpoint",
+                    "description": "pT3-4 with positive nodes or margins: consider adjuvant radiation (category 2B)",
+                    "link": "BL-E-4:start"
+                }
+            ]
+        },
+        "footnotes": {
+            "c": "Principles of Imaging for Bladder/Urothelial Cancer (BL-A).",
+            "d": "Principles of Surgical Management (BL-B).",
+            "p": "Intravesical therapy details – see BL-E.",
+            "z": "Adjuvant cisplatin chemo preferred if no prior cisplatin and high pathologic risk.",
+            "ee": "Most appropriate for patients wishing to delay recurrence even if cure chance was low.",
+            "bb": "See Principles of Radiation Management of Invasive Disease (BL-H)."
+        },
+        "links": [
+            {
+                "from": "BL-5.adjuvant_bl6",
+                "to": "BL-6:start"
+            },
+            {
+                "from": "BL-6.use_durvalumab_postop",
+                "to": "BL-E-4:start"
+            },
+            {
+                "from": "BL-6.discuss_cisplatin_or_io",
+                "to": "BL-E-4:start"
+            },
+            {
+                "from": "BL-6.consider_nivolumab_or_pembro",
+                "to": "BL-E-4:start"
+            },
+            {
+                "from": "BL-6.consider_adjuvant_rt",
+                "to": "BL-E-4:start"
+            }
+        ]
+    },
+    {
+        "name": "MIBC_Stage_IIIA_Management",
+        "id": "BL-7",
+        "version": "NCCN_1.2025",
+        "category": "Muscle-Invasive Bladder Cancer (Stage IIIA – cT3 N0, cT4a N0, or cT1–cT4a N1)",
+        "description": "Work-up, primary treatment, and subsequent management for clinical stage IIIA MIBC",
+        "algorithm": {
+            "start": "stage_iiia_entry",
+            "nodes": [
+                {
+                    "id": "stage_iiia_entry",
+                    "type": "info",
+                    "description": "Clinical staging: Stage IIIA (cT3, N0; cT4a, N0; or cT1–cT4a, N1)",
+                    "next": "additional_workup"
+                },
+                {
+                    "id": "additional_workup",
+                    "type": "action",
+                    "description": "Perform additional imaging and labs",
+                    "tasks": [
+                        "CT or MRI abdomen/pelvis if not previously done",
+                        "Chest imaging (CT chest)",
+                        "Bone scan or MRI if suspicion / symptoms of bone metastases",
+                        "Estimate GFR to assess cisplatin eligibility"
+                    ],
+                    "next": "primary_treatment"
+                },
+                {
+                    "id": "primary_treatment",
+                    "type": "decision",
+                    "question": "Choose primary treatment strategy",
+                    "options": {
+                        "neoadj_chemo_radical_cystectomy": {
+                            "next": "adjuvant_bl6"
+                        },
+                        "cystectomy_alone": {
+                            "next": "adjuvant_bl6"
+                        },
+                        "bladder_preservation_chemoRT": {
+                            "next": "reassess_post_treatment"
+                        },
+                        "radiation_only_not_surgical_candidate": {
+                            "next": "reassess_post_treatment"
+                        }
+                    }
+                },
+                {
+                    "id": "adjuvant_bl6",
+                    "type": "endpoint",
+                    "description": "Proceed to Adjuvant Treatment (BL-6)",
+                    "link": "BL-6:start"
+                },
+                {
+                    "id": "reassess_post_treatment",
+                    "type": "decision",
+                    "question": "Reassess tumor status 2–3 mo after treatment completion",
+                    "options": {
+                        "no_tumor": "no_tumor_management",
+                        "tumor_present": "tumor_management"
+                    }
+                },
+                {
+                    "id": "no_tumor_management",
+                    "type": "endpoint",
+                    "description": "Surveillance",
+                    "link": "BL-E-4:start"
+                },
+                {
+                    "id": "tumor_management",
+                    "type": "decision",
+                    "question": "Residual disease classification",
+                    "options": {
+                        "CIS_Ta_T1": "turbt_intravesical",
+                        "persistent_T2": "surgical_or_metastatic"
+                    }
+                },
+                {
+                    "id": "turbt_intravesical",
+                    "type": "endpoint",
+                    "description": "TURBT ± intravesical therapy then follow-up",
+                    "link": "BL-E-4:start"
+                },
+                {
+                    "id": "surgical_or_metastatic",
+                    "type": "decision",
+                    "question": "Is patient a candidate for surgical re-resection?",
+                    "options": {
+                        "yes": {
+                            "description": "Cystectomy or partial cystectomy (highly selected)",
+                            "link": "BL-E-4:start"
+                        },
+                        "no": {
+                            "description": "Treat as metastatic disease",
+                            "link": "BL-10:start"
+                        }
+                    }
+                }
+            ]
+        },
+        "footnotes": {
+            "p": "Principles of Instillation Therapy (BL-E).",
+            "d": "Partial cystectomy only in highly-selected solitary lesions, no CIS.",
+            "aa": "Concurrent chemoradiotherapy per Principles of Systemic Therapy.",
+            "bb": "See BL-6 footnotes for reassessment timing.",
+            "cc": "Optimal chemoradiation candidates lack multifocal CIS and have <6 cm tumor."
+        },
+        "links": []
+    },
+    {
+        "name": "MIBC_Stage_IIIB_Management",
+        "id": "BL-8",
+        "version": "NCCN_1.2025",
+        "category": "Muscle-Invasive Bladder Cancer (Stage IIIB – cT1–cT4a, N2-3)",
+        "description": "Work-up, down-staging therapy, and subsequent management for clinical stage IIIB MIBC",
+        "algorithm": {
+            "start": "stage_iiib_entry",
+            "nodes": [
+                {
+                    "id": "stage_iiib_entry",
+                    "type": "info",
+                    "description": "Clinical staging: Stage IIIB (cT1–cT4a, N2-3)",
+                    "next": "additional_workup"
+                },
+                {
+                    "id": "additional_workup",
+                    "type": "action",
+                    "description": "Perform additional imaging / labs",
+                    "tasks": [
+                        "CT or MRI abdomen/pelvis if not previously done",
+                        "Chest imaging (CT chest)",
+                        "Bone scan or MRI if suspicion or symptoms of bone metastases",
+                        "Consider molecular/genomic testing ᵍᵍ",
+                        "Estimate GFR to assess cisplatin eligibility"
+                    ],
+                    "next": "downstaging_systemic"
+                },
+                {
+                    "id": "downstaging_systemic",
+                    "type": "action",
+                    "description": "Give down-staging systemic therapy ᵈᵈ",
+                    "next": "reassess_post_treatment"
+                },
+                {
+                    "id": "reassess_post_treatment",
+                    "type": "decision",
+                    "question": "Reassess tumor status 2–3 mo after treatment completion ʰʰ",
+                    "options": {
+                        "complete_response": "complete_response_path",
+                        "partial_response": "partial_response_path",
+                        "progression": "progression_path"
+                    }
+                },
+                {
+                    "id": "complete_response_path",
+                    "type": "endpoint",
+                    "description": "Consolidation cystectomy **or** consolidation chemoradiotherapy **or** surveillance",
+                    "link": "BL-E-4:start"
+                },
+                {
+                    "id": "partial_response_path",
+                    "type": "decision",
+                    "question": "Choose management for partial response",
+                    "options": {
+                        "cystectomy": {
+                            "description": "Cystectomy",
+                            "link": "BL-E-4:start"
+                        },
+                        "chemoradiotherapy": {
+                            "description": "Chemoradiotherapy",
+                            "link": "BL-E-4:start"
+                        },
+                        "treat_recurrence": {
+                            "description": "Treat per recurrence stage",
+                            "link": "BL-11:start"
+                        }
+                    }
+                },
+                {
+                    "id": "progression_path",
+                    "type": "endpoint",
+                    "description": "Treat as metastatic disease",
+                    "link": "BL-10:start"
+                }
+            ]
+        },
+        "footnotes": {
+            "c": "Principles of Imaging for Bladder/Urothelial Cancer (BL-A).",
+            "d": "Principles of Surgical Management (BL-B).",
+            "dd": "Down-staging systemic therapy per Principles of Systemic Therapy (BL-G 2 of 7).",
+            "aa": "Concurrent chemoradiotherapy per Principles of Systemic Therapy.",
+            "bb": "See Principles of Radiation Management of Invasive Disease (BL-H).",
+            "gg": "Consider molecular / genomic testing per Principles of Alternative Risk Classifiers (BL-I).",
+            "hh": "Imaging with CT of chest/abdomen/pelvis with contrast; if no distant disease, further cystoscopic assessment may be considered.",
+            "ii": "If complete response achieved, treat recurrence according to stage of recurrent disease."
+        },
+        "links": []
+    },
+    {
+        "name": "MIBC_Stage_IVA_Management",
+        "id": "BL-9",
+        "version": "NCCN_1.2025",
+        "category": "Muscle-Invasive Bladder Cancer (Stage IVA – cT4b Any N M0 or Any T Any N M1a)",
+        "description": "Work-up, primary treatment, and subsequent management for clinical stage IVA disease",
+        "algorithm": {
+            "start": "stage_iva_entry",
+            "nodes": [
+                {
+                    "id": "stage_iva_entry",
+                    "type": "info",
+                    "description": "Clinical staging: Stage IVA (cT4b Any N M0 --OR-- Any T Any N M1a)",
+                    "next": "additional_workup"
+                },
+                {
+                    "id": "additional_workup",
+                    "type": "action",
+                    "description": "Obtain baseline studies",
+                    "tasks": [
+                        "CT or MRI abdomen/pelvis if not previously done",
+                        "Chest CT",
+                        "Bone scan or MRI if bone symptoms / suspicion",
+                        "Molecular / genomic testing ᵍᵍ",
+                        "Estimate GFR to decide cisplatin eligibility"
+                    ],
+                    "next": "disease_category"
+                },
+                {
+                    "id": "disease_category",
+                    "type": "decision",
+                    "question": "Disease classification",
+                    "options": {
+                        "M0_disease": "m0_primary",
+                        "M1a_disease": "m1a_primary"
+                    }
+                },
+                {
+                    "id": "m0_primary",
+                    "type": "decision",
+                    "question": "Primary treatment for M0 disease",
+                    "options": {
+                        "systemic_therapy": "m0_reassess",
+                        "concurrent_chemoRT": "m0_reassess"
+                    }
+                },
+                {
+                    "id": "m0_reassess",
+                    "type": "decision",
+                    "question": "Reassess tumor status 2-3 mo after treatment",
+                    "options": {
+                        "no_tumor": "m0_no_tumor",
+                        "tumor_present": "m0_tumor_present"
+                    }
+                },
+                {
+                    "id": "m0_no_tumor",
+                    "type": "endpoint",
+                    "description": "Consider consolidation systemic therapy **or** chemoradiotherapy (if no prior RT) ± cystectomy, then follow-up",
+                    "link": "BL-E-4:start"
+                },
+                {
+                    "id": "m0_tumor_present",
+                    "type": "endpoint",
+                    "description": "Systemic therapy **or** chemoradiotherapy (if no prior RT) ± cystectomy, then follow-up",
+                    "link": "BL-E-4:start"
+                },
+                {
+                    "id": "m1a_primary",
+                    "type": "action",
+                    "description": "Systemic therapy ᵈᵈ for M1a disease",
+                    "next": "m1a_reassess"
+                },
+                {
+                    "id": "m1a_reassess",
+                    "type": "decision",
+                    "question": "Evaluate response (cystoscopy, EUA, TURBT, imaging)",
+                    "options": {
+                        "complete_or_partial_response": "m1a_good_response",
+                        "stable_or_progression": "m1a_progression"
+                    }
+                },
+                {
+                    "id": "m1a_good_response",
+                    "type": "endpoint",
+                    "description": "Consider consolidative local therapy in selected cases (non-bulky, no significant progression), then follow-up",
+                    "link": "BL-E-4:start"
+                },
+                {
+                    "id": "m1a_progression",
+                    "type": "endpoint",
+                    "description": "Treat as metastatic disease",
+                    "link": "BL-10:start"
+                }
+            ]
+        },
+        "footnotes": {
+            "c": "Principles of Imaging for Bladder/Urothelial Cancer (BL-A).",
+            "d": "Principles of Surgical Management (BL-B).",
+            "dd": "Systemic therapy details – see Principles of Systemic Therapy (BL-G 5 of 7).",
+            "aa": "Concurrent chemoradiotherapy per Principles of Systemic Therapy.",
+            "bb": "Principles of Radiation Management of Invasive Disease (BL-H).",
+            "gg": "Principles of Alternative Risk Classifiers & Biomarkers (BL-I).",
+            "hh": "If complete response, recurrence should be treated per stage of disease (BL-11)."
+        },
+        "links": [
+            {
+                "from": "BL-9.m0_no_tumor",
+                "to": "BL-E-4:start"
+            },
+            {
+                "from": "BL-9.m0_tumor_present",
+                "to": "BL-E-4:start"
+            },
+            {
+                "from": "BL-9.m1a_good_response",
+                "to": "BL-E-4:start"
+            },
+            {
+                "from": "BL-9.m1a_progression",
+                "to": "BL-10:start"
+            }
+        ]
+    },
+    {
+        "name": "MIBC_Stage_IVB_Metastatic",
+        "id": "BL-10",
+        "version": "NCCN_1.2025",
+        "category": "Muscle-Invasive Bladder Cancer (Stage IVB – Metastatic: Any T, Any N, M1b)",
+        "description": "Initial work-up and first-line management of metastatic bladder cancer",
+        "algorithm": {
+            "start": "metastatic_entry",
+            "nodes": [
+                {
+                    "id": "metastatic_entry",
+                    "type": "info",
+                    "description": "Clinical staging: Stage IVB (Any T, Any N, M1b)",
+                    "next": "additional_workup"
+                },
+                {
+                    "id": "additional_workup",
+                    "type": "action",
+                    "description": "Perform baseline imaging / labs",
+                    "tasks": [
+                        "Bone scan or MRI if bone symptoms / suspicion",
+                        "Chest CT",
+                        "CNS imaging if neurologic symptoms (category 2B)",
+                        "Estimate GFR to assess cisplatin eligibility",
+                        "Consider biopsy if technically feasible",
+                        "Molecular / genomic testing ᵍᵍ"
+                    ],
+                    "next": "primary_treatment"
+                },
+                {
+                    "id": "primary_treatment",
+                    "type": "endpoint",
+                    "description": "Systemic therapy (see BL-G 2 of 7 & 4 of 7) **and/or** palliative radiotherapy (BL-H). Then enter surveillance.",
+                    "link": "BL-E-6:start"
+                }
+            ]
+        },
+        "footnotes": {
+            "c": "Principles of Imaging for Bladder/Urothelial Cancer (BL-A).",
+            "bb": "Principles of Radiation Management of Invasive Disease (BL-H).",
+            "dd": "Systemic therapy details – Principles of Systemic Therapy (BL-G 2 of 7).",
+            "kk": "See Principles of Systemic Therapy (BL-G 3 of 7 and 4 of 7).",
+            "gg": "Principles of Alternative Risk Classifiers & Biomarkers (BL-I)."
+        },
+        "links": [
+            {
+                "from": "BL-10.primary_treatment",
+                "to": "BL-E-6:start"
+            }
+        ]
+    },
+    {
+        "name": "Recurrent_or_Persistent_Disease",
+        "id": "BL-11",
+        "version": "NCCN_1.2025",
+        "category": "Muscle-Invasive Bladder Cancer – Recurrent / Persistent Disease",
+        "description": "Management after a curative-intent course when disease recurs or persists",
+        "algorithm": {
+            "start": "event_detected",
+            "nodes": [
+                {
+                    "id": "event_detected",
+                    "type": "info",
+                    "description": "Recurrent or persistent disease detected on surveillance",
+                    "next": "prior_cystectomy_status"
+                },
+                {
+                    "id": "prior_cystectomy_status",
+                    "type": "decision",
+                    "question": "Was a cystectomy already performed?",
+                    "options": {
+                        "yes_post_cystectomy": "post_cystectomy_rec",
+                        "no_bladder_preserved": "bladder_preserved_rec"
+                    }
+                },
+                {
+                    "id": "post_cystectomy_rec",
+                    "type": "endpoint",
+                    "description": "Metastatic or local recurrence after cystectomy",
+                    "link": "BL-10:start"
+                },
+                {
+                    "id": "bladder_preserved_rec",
+                    "type": "decision",
+                    "question": "Initial evaluation with cytology / imaging / cystoscopy",
+                    "options": {
+                        "cytology_pos_imaging_neg_cystoscopy_neg": "bl4_jump",
+                        "tumor_detected": "classify_tumor_category"
+                    }
+                },
+                {
+                    "id": "bl4_jump",
+                    "type": "endpoint",
+                    "description": "Cytology positive, imaging negative, cystoscopy negative → work-up",
+                    "link": "BL-4:start"
+                },
+                {
+                    "id": "classify_tumor_category",
+                    "type": "decision",
+                    "question": "Pathology of recurrent / persistent lesion",
+                    "options": {
+                        "muscle_invasive": "muscle_invasive_tx",
+                        "cis_ta_t1": "cis_ta_t1_tx"
+                    }
+                },
+                {
+                    "id": "muscle_invasive_tx",
+                    "type": "endpoint",
+                    "description": "Cystectomy **or** chemoradiotherapy (if no prior RT) **or** systemic therapy **or** palliative TURBT + best supportive care",
+                    "link": "BL-E-4:start"
+                },
+                {
+                    "id": "cis_ta_t1_tx",
+                    "type": "decision",
+                    "question": "Initial salvage modality",
+                    "options": {
+                        "intravesical_tx_or_turbt": "response_check",
+                        "primary_cystectomy": "cystectomy_endpoint"
+                    }
+                },
+                {
+                    "id": "response_check",
+                    "type": "decision",
+                    "question": "Response to intravesical therapy / TURBT",
+                    "options": {
+                        "response": "follow_up_endpoint",
+                        "no_response": "cystectomy_endpoint"
+                    }
+                },
+                {
+                    "id": "cystectomy_endpoint",
+                    "type": "endpoint",
+                    "description": "Proceed to cystectomy",
+                    "link": "BL-E-4:start"
+                },
+                {
+                    "id": "follow_up_endpoint",
+                    "type": "endpoint",
+                    "description": "Return to routine follow-up",
+                    "link": "BL-E-4:start"
+                }
+            ]
+        },
+        "footnotes": {
+            "c": "Principles of Imaging for Bladder/Urothelial Cancer (BL-A).",
+            "d": "Principles of Surgical Management (BL-B).",
+            "p": "Intravesical therapy per Principles of Instillation Therapy (BL-E).",
+            "aa": "Concurrent chemoradiotherapy per Principles of Systemic Therapy.",
+            "bb": "Principles of Radiation Management of Invasive Disease (BL-H).",
+            "dd": "Systemic therapy details – see Principles of Systemic Therapy (BL-G 3-7).",
+            "kk": "See systemic therapy options BL-G 3 of 7 and 4 of 7."
+        },
+        "links": [
+            {
+                "from": "BL-11.post_cystectomy_rec",
+                "to": "BL-10:start"
+            },
+            {
+                "from": "BL-11.bl4_jump",
+                "to": "BL-4:start"
+            },
+            {
+                "from": "BL-11.muscle_invasive_tx",
+                "to": "BL-E-4:start"
+            },
+            {
+                "from": "BL-11.cystectomy_endpoint",
+                "to": "BL-E-4:start"
+            },
+            {
+                "from": "BL-11.follow_up_endpoint",
+                "to": "BL-E-4:start"
+            },
+            {
+                "from": "BL-E-4.post_cystectomy_mibc",
+                "to": "BL-11:start"
+            },
+            {
+                "from": "BL-E-5.post_bladder_sparing",
+                "to": "BL-11:start"
+            },
+            {
+                "from": "BL-8.partial_response_path",
+                "to": "BL-11:start"
+            }
+        ]
+    }
+]

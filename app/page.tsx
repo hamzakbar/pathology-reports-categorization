@@ -59,7 +59,7 @@ export default function Home() {
       const formData = new FormData()
       formData.append('file', selectedFile)
 
-      const res = await fetch(`/api/generate-report?criteria=${criteria}`, {
+      const res = await fetch(`/api/generate-report-${criteria}`, {
         method: 'POST',
         body: formData,
       })
