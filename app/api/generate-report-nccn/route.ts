@@ -32,6 +32,8 @@ Task
 - **If decisive criteria are absent** and the tumor’s size or number is unknown, list **possible risk categories** instead of assigning a single one.
 - Rewrite recommendations in **plain, human-readable language**:
 - Format all recommendations in clear, professional, and readable bullet points.
+- IMPORTANT => For high-grade Ta with muscle present, phrase it as ‘consider repeat TURBT’ (no strong recommendation in this case); only for T1 or absent muscle make it a firm recommendation.
+- IMPORTANT => If the text mentions *“carcinoma in situ”, “CIS”, “Tis”,* or *“flat high-grade lesion”*, label the pathological stage as **Tis** (e.g., **CIS (pTis)**) – never **Ta**.
 
 After every section there should be a proper gap before the new section starts.
 
