@@ -91,7 +91,7 @@ export function MarkdownContent({ markdown, report }: { markdown: string, report
         blockquote: (props) => (
           <blockquote className='mt-6 border-l-2 pl-6 italic' {...props} />
         ),
-        br: (props) => <br {...props} />,
+        hr: (props) => <hr {...props} className='my-4' />,
         code: (props) => (
           <code
             className='relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold'
