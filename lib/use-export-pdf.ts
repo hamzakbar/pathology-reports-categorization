@@ -15,6 +15,10 @@ export function usePdfExport() {
 
     setIsExporting(true)
     try {
+      const sanitizedReport = report
+        .replace(/≤/g, '<=')
+        .replace(/≥/g, '>=');
+
       const fontBytes = await fetch('/fonts/NotoSans-Regular.ttf').then((res) => res.arrayBuffer())
       const boldFontBytes = await fetch('/fonts/NotoSans-Bold.ttf').then((res) => res.arrayBuffer())
       const originalPdfBytes = await selectedFile.arrayBuffer()
@@ -99,7 +103,7 @@ export function usePdfExport() {
 
       y -= 20; 
 
-      const reportLines = report.split('\n');
+      const reportLines = sanitizedReport.split('\n');
       for (const line of reportLines) {
         if (line.startsWith('# ')) {
           y -= 15; 
